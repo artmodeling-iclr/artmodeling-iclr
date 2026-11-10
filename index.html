@@ -7,9 +7,8 @@
   <meta name="description" content="ArtModeling: an instance-matched collection of articulated objects, real observations, interaction sequences and USD assets.">
   <title>ArtModeling — Articulated Objects in the Real World</title>
   <link rel="preload" href="assets/objects/cabinet16/poster.webp" as="image">
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js"></script>
+  <link rel="stylesheet" href="styles.css?v=20261110-gallery2">
+  <script src="app.js?v=20261110-gallery2" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -50,51 +49,45 @@
         <div class="section-heading instances-heading">
           <div>
             <p class="section-kicker">02 / INSTANCE EXPLORER</p>
-            <h2 id="instances-title">Nine Instances · Eight Categories</h2>
+            <h2 id="instances-title">Selected Dataset Examples</h2>
           </div>
         </div>
-        <div class="filter-bar" role="group" aria-label="Filter instances">
-          <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">All instances <span>09</span></button>
-          <button class="filter-button" type="button" data-filter="storage" aria-pressed="false">Storage & cases <span>05</span></button>
-          <button class="filter-button" type="button" data-filter="appliance" aria-pressed="false">Appliances <span>03</span></button>
-          <button class="filter-button" type="button" data-filter="electronics" aria-pressed="false">Electronics <span>01</span></button>
-        </div>
         <div class="object-grid" id="object-grid">
-          <button type="button" class="object-card" data-id="cabinet16" data-group="storage" data-tone="slate" aria-label="Explore Cabinet 16">
-            <span class="object-visual"><span class="card-index">01 / 09</span><img src="assets/objects/cabinet16/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">CABINET</span><strong>Cabinet 16</strong><span class="object-id">cabinet16</span></span>
+          <button type="button" class="object-card" data-id="letter_tray1" data-tone="silver" aria-label="View Letter Tray data">
+            <span class="object-visual"><img src="assets/objects/letter_tray1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>Letter Tray</strong></span>
           </button>
-          <button type="button" class="object-card" data-id="cabinet17" data-group="storage" data-tone="sage" aria-label="Explore Cabinet 17">
-            <span class="object-visual"><span class="card-index">02 / 09</span><img src="assets/objects/cabinet17/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">CABINET</span><strong>Cabinet 17</strong><span class="object-id">cabinet17</span></span>
+          <button type="button" class="object-card" data-id="cabinet17" data-tone="sage" aria-label="View Cabinet data">
+            <span class="object-visual"><img src="assets/objects/cabinet17/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>Cabinet</strong></span>
           </button>
-          <button type="button" class="object-card" data-id="dressing_case2" data-group="storage" data-tone="amber" aria-label="Explore Dressing Case 2">
-            <span class="object-visual"><span class="card-index">03 / 09</span><img src="assets/objects/dressing_case2/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">DRESSING CASE</span><strong>Dressing Case 2</strong><span class="object-id">dressing_case2</span></span>
+          <button type="button" class="object-card" data-id="dressing_case2" data-tone="amber" aria-label="View Dressing Case data">
+            <span class="object-visual"><img src="assets/objects/dressing_case2/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>Dressing Case</strong></span>
           </button>
-          <button type="button" class="object-card" data-id="firstkit2" data-group="storage" data-tone="mint" aria-label="Explore First Aid Kit 2">
-            <span class="object-visual"><span class="card-index">04 / 09</span><img src="assets/objects/firstkit2/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">FIRST AID KIT</span><strong>First Aid Kit 2</strong><span class="object-id">firstkit2</span></span>
+          <button type="button" class="object-card" data-id="firstkit2" data-tone="mint" aria-label="View First Aid Kit data">
+            <span class="object-visual"><img src="assets/objects/firstkit2/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>First Aid Kit</strong></span>
           </button>
-          <button type="button" class="object-card" data-id="fryer1" data-group="appliance" data-tone="lime" aria-label="Explore Air Fryer 1">
-            <span class="object-visual"><span class="card-index">05 / 09</span><img src="assets/objects/fryer1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">AIR FRYER</span><strong>Air Fryer 1</strong><span class="object-id">fryer1</span></span>
+          <button type="button" class="object-card" data-id="fryer1" data-tone="lime" aria-label="View Air Fryer data">
+            <span class="object-visual"><img src="assets/objects/fryer1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>Air Fryer</strong></span>
           </button>
-          <button type="button" class="object-card" data-id="laptop1" data-group="electronics" data-tone="silver" aria-label="Explore Laptop 1">
-            <span class="object-visual"><span class="card-index">06 / 09</span><img src="assets/objects/laptop1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">LAPTOP</span><strong>Laptop 1</strong><span class="object-id">laptop1</span></span>
+          <button type="button" class="object-card" data-id="laptop1" data-tone="silver" aria-label="View Laptop data">
+            <span class="object-visual"><img src="assets/objects/laptop1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>Laptop</strong></span>
           </button>
-          <button type="button" class="object-card" data-id="microwave1" data-group="appliance" data-tone="ice" aria-label="Explore Microwave 1">
-            <span class="object-visual"><span class="card-index">07 / 09</span><img src="assets/objects/microwave1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">MICROWAVE</span><strong>Microwave 1</strong><span class="object-id">microwave1</span></span>
+          <button type="button" class="object-card" data-id="microwave1" data-tone="ice" aria-label="View Microwave data">
+            <span class="object-visual"><img src="assets/objects/microwave1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>Microwave</strong></span>
           </button>
-          <button type="button" class="object-card" data-id="oven4" data-group="appliance" data-tone="coral" aria-label="Explore Oven 4">
-            <span class="object-visual"><span class="card-index">08 / 09</span><img src="assets/objects/oven4/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">OVEN</span><strong>Oven 4</strong><span class="object-id">oven4</span></span>
+          <button type="button" class="object-card" data-id="oven4" data-tone="coral" aria-label="View Oven data">
+            <span class="object-visual"><img src="assets/objects/oven4/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>Oven</strong></span>
           </button>
-          <button type="button" class="object-card" data-id="ricebucket1" data-group="storage" data-tone="cream" aria-label="Explore Rice Bucket 1">
-            <span class="object-visual"><span class="card-index">09 / 09</span><img src="assets/objects/ricebucket1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
-            <span class="object-info"><span class="object-type">RICE BUCKET</span><strong>Rice Bucket 1</strong><span class="object-id">ricebucket1</span></span>
+          <button type="button" class="object-card" data-id="ricebucket1" data-tone="cream" aria-label="View Rice Bucket data">
+            <span class="object-visual"><img src="assets/objects/ricebucket1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><strong>Rice Bucket</strong></span>
           </button>
         </div>
       </div>
@@ -113,15 +106,16 @@
 
   <dialog class="instance-dialog" id="instance-dialog" aria-labelledby="dialog-title">
     <div class="dialog-shell">
-      <div class="dialog-header"><div><p class="dialog-eyebrow" id="dialog-category"></p><h2 id="dialog-title"></h2></div><button type="button" class="dialog-close" id="dialog-close" aria-label="Close instance viewer">×</button></div>
+      <div class="dialog-header"><h2 id="dialog-title"></h2><button type="button" class="dialog-close" id="dialog-close" aria-label="Close instance viewer">×</button></div>
       <div class="dialog-tabs" role="tablist" aria-label="Instance media">
         <button type="button" role="tab" data-tab="start" aria-selected="true">Start state</button>
         <button type="button" role="tab" data-tab="end" aria-selected="false">End state</button>
         <button type="button" role="tab" data-tab="supplemental" aria-selected="false">Extra view</button>
         <button type="button" role="tab" data-tab="motion" aria-selected="false">Interaction</button>
-        <button type="button" role="tab" data-tab="geometry" aria-selected="false">3D geometry</button>
+        <button type="button" role="tab" data-tab="geometry" aria-selected="false">USD Asset Motion</button>
       </div>
       <div class="dialog-content" id="dialog-content" role="tabpanel"></div>
+      <span id="dialog-category" hidden></span><span id="dialog-note" hidden></span><span id="dialog-counter" hidden></span>
     </div>
   </dialog>
 </body>

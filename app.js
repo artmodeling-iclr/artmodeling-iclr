@@ -1,19 +1,18 @@
 const instances = {
-  cabinet16: { title: "Cabinet 16", category: "Cabinet" },
-  cabinet17: { title: "Cabinet 17", category: "Cabinet" },
-  dressing_case2: { title: "Dressing Case 2", category: "Dressing case" },
-  firstkit2: { title: "First Aid Kit 2", category: "First aid kit" },
-  fryer1: { title: "Air Fryer 1", category: "Air fryer" },
-  laptop1: { title: "Laptop 1", category: "Laptop" },
-  microwave1: { title: "Microwave 1", category: "Microwave" },
-  oven4: { title: "Oven 4", category: "Oven" },
-  ricebucket1: { title: "Rice Bucket 1", category: "Rice bucket" },
+  letter_tray1: { title: "Letter Tray" },
+  cabinet17: { title: "Cabinet" },
+  dressing_case2: { title: "Dressing Case" },
+  firstkit2: { title: "First Aid Kit" },
+  fryer1: { title: "Air Fryer" },
+  laptop1: { title: "Laptop" },
+  microwave1: { title: "Microwave" },
+  oven4: { title: "Oven" },
+  ricebucket1: { title: "Rice Bucket" },
 };
 
 const dialog = document.querySelector("#instance-dialog");
 const dialogContent = document.querySelector("#dialog-content");
 const dialogTitle = document.querySelector("#dialog-title");
-const dialogCategory = document.querySelector("#dialog-category");
 const dialogTabs = [...document.querySelectorAll(".dialog-tabs [role='tab']")];
 let currentId = null;
 let currentTab = "start";
@@ -54,23 +53,19 @@ function renderMotionTab(id) {
 
 function renderGeometryTab(id) {
   const layout = document.createElement("div");
-  layout.className = "dialog-geometry";
-  const viewerWrap = document.createElement("div");
-  viewerWrap.className = "viewer-wrap";
-  const fallback = createImage(asset(id, "poster"), `${instances[id].title} object preview`);
-  fallback.className = "viewer-fallback";
-  const viewer = document.createElement("model-viewer");
-  viewer.setAttribute("src", `assets/geometry/${id}.glb`);
-  viewer.setAttribute("alt", `Rotatable geometry preview of ${instances[id].title}`);
-  viewer.setAttribute("camera-controls", "");
-  viewer.setAttribute("camera-orbit", "35deg 70deg auto");
-  viewer.setAttribute("touch-action", "pan-y");
-  viewer.setAttribute("shadow-intensity", "0.7");
-  viewer.setAttribute("exposure", "1.1");
-  viewer.addEventListener("load", () => viewerWrap.classList.add("is-ready"));
-  viewer.addEventListener("error", () => viewerWrap.classList.add("has-error"));
-  viewerWrap.append(fallback, viewer);
-  layout.append(viewerWrap);
+  layout.className = "dialog-usd-motion";
+  const video = document.createElement("video");
+  video.src = `assets/motion/${id}.mp4`;
+  video.poster = asset(id, "poster");
+  video.autoplay = true;
+  video.loop = true;
+  video.muted = true;
+  video.playsInline = true;
+  video.controls = true;
+  video.preload = "metadata";
+  video.setAttribute("aria-label", `${instances[id].title} USD articulated asset motion`);
+  video.textContent = "Your browser does not support this video.";
+  layout.append(video);
   dialogContent.append(layout);
 }
 
@@ -93,7 +88,6 @@ function openInstance(id, tab = "start") {
   if (!instance) return;
   currentId = id;
   dialogTitle.textContent = instance.title;
-  dialogCategory.textContent = `${instance.category.toUpperCase()} / ${id}`;
   selectTab(tab);
   if (!dialog.open) dialog.showModal();
 }
@@ -120,20 +114,6 @@ dialogTabs.forEach((button, index) => {
       (index + (event.key === "ArrowRight" ? 1 : -1) + dialogTabs.length) % dialogTabs.length;
     dialogTabs[next].focus();
     selectTab(dialogTabs[next].dataset.tab);
-  });
-});
-
-document.querySelectorAll(".filter-button").forEach((button) => {
-  button.addEventListener("click", () => {
-    const filter = button.dataset.filter;
-    document.querySelectorAll(".filter-button").forEach((item) => {
-      const active = item === button;
-      item.classList.toggle("is-active", active);
-      item.setAttribute("aria-pressed", String(active));
-    });
-    document.querySelectorAll(".object-card").forEach((card) => {
-      card.hidden = filter !== "all" && card.dataset.group !== filter;
-    });
   });
 });
 
