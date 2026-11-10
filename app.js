@@ -72,7 +72,7 @@ function renderGeometryTab(id) {
 
 function loadPhysicsData() {
   if (!physicsDataPromise) {
-    physicsDataPromise = fetch("assets/physics.json?v=20261110-physics2").then((response) => {
+    physicsDataPromise = fetch("assets/physics.json?v=20261110-physics3").then((response) => {
       if (!response.ok) throw new Error("Physical properties could not be loaded");
       return response.json();
     });
@@ -85,16 +85,6 @@ function physicalNumber(value) {
   if (!Number.isFinite(number)) return "—";
   if (number !== 0 && Math.abs(number) < 0.001) return number.toExponential(2);
   return Number(number.toPrecision(3)).toLocaleString("en-US", { maximumFractionDigits: 6 });
-}
-
-function physicalVector(value, unit) {
-  if (!Array.isArray(value) || value.length !== 3) return "—";
-  return `x ${physicalNumber(value[0])} · y ${physicalNumber(value[1])} · z ${physicalNumber(value[2])} ${unit}`;
-}
-
-function physicalQuaternion(value) {
-  if (!Array.isArray(value) || value.length !== 4) return "—";
-  return `w ${physicalNumber(value[0])} · x ${physicalNumber(value[1])} · y ${physicalNumber(value[2])} · z ${physicalNumber(value[3])}`;
 }
 
 function physicsMetrics(entries, className = "physics-metrics") {
@@ -132,20 +122,6 @@ function physicsSection(title, className) {
 function partCard(part) {
   const card = document.createElement("article");
   card.className = "physics-part-card";
-  const visual = document.createElement("div");
-  visual.className = "physics-part-visual";
-  if (part.image) {
-    visual.append(physicsImage(part.image, `${part.name} ${part.image_note ? "associated component view" : "part render"}`));
-    if (part.image_note) {
-      const note = document.createElement("span");
-      note.className = "physics-image-note";
-      note.textContent = part.image_note;
-      visual.append(note);
-    }
-  } else {
-    visual.classList.add("physics-part-visual--empty");
-    visual.textContent = "Part render unavailable";
-  }
   const detail = document.createElement("div");
   detail.className = "physics-part-detail";
   const label = document.createElement("span");
@@ -156,9 +132,6 @@ function partCard(part) {
   detail.append(label, name, physicsMetrics([
     ["Mass", `${physicalNumber(part.mass_kg)} kg`],
     ["Bulk density", `${physicalNumber(part.effective_bulk_density_kg_m3)} kg/m³`],
-    ["Center of mass", physicalVector(part.center_of_mass_m, "m")],
-    ["Diagonal inertia", physicalVector(part.diagonal_inertia_kg_m2, "kg·m²")],
-    ["Principal axes", physicalQuaternion(part.principal_axes_wxyz)],
   ]));
   for (const material of part.materials || []) {
     const materialBlock = document.createElement("div");
@@ -173,44 +146,6 @@ function partCard(part) {
     ], "physics-material-metrics"));
     detail.append(materialBlock);
   }
-  card.append(visual, detail);
-  return card;
-}
-
-function jointCard(joint, parts) {
-  const card = document.createElement("article");
-  card.className = "physics-joint-card";
-  const relatedPart = parts.find((part) => part.index === joint.child_part_index);
-  const imagePath = joint.image || relatedPart?.image;
-  if (imagePath) {
-    const visual = document.createElement("div");
-    visual.className = "physics-joint-visual";
-    visual.append(physicsImage(imagePath, `${relatedPart?.name || joint.name} connected to ${joint.name}`));
-    if (relatedPart?.image_note) {
-      const note = document.createElement("span");
-      note.className = "physics-image-note";
-      note.textContent = relatedPart.image_note;
-      visual.append(note);
-    }
-    card.append(visual);
-  } else {
-    card.classList.add("physics-joint-card--no-image");
-  }
-  const detail = document.createElement("div");
-  detail.className = "physics-joint-detail";
-  const label = document.createElement("span");
-  label.className = "physics-item-index";
-  label.textContent = `JOINT ${String(joint.index).padStart(2, "0")}`;
-  const name = document.createElement("h4");
-  name.textContent = joint.name;
-  const type = joint.type ? joint.type[0].toUpperCase() + joint.type.slice(1) : "—";
-  const entries = [["Type", type]];
-  if (joint.type !== "fixed") {
-    entries.push(["Axis", joint.axis || "—"]);
-    const unit = joint.type === "revolute" ? "°" : "m";
-    entries.push(["Limits", `${physicalNumber(joint.lower)} to ${physicalNumber(joint.upper)} ${unit}`]);
-  }
-  detail.append(label, name, physicsMetrics(entries, "physics-joint-metrics"));
   card.append(detail);
   return card;
 }
@@ -232,11 +167,13 @@ async function renderPhysicsTab(id) {
       note.textContent = "Updated physical properties are not available for this instance.";
       return;
     }
+    const overview = document.createElement("figure");
+    overview.className = "physics-overview";
+    overview.append(physicsImage(values.image, `${instances[id].title} complete asset render`));
     const parts = physicsSection("Parts", "physics-part-grid");
     for (const part of values.parts) parts.cards.append(partCard(part));
-    const joints = physicsSection("Joints", "physics-joint-grid");
-    for (const joint of values.joints) joints.cards.append(jointCard(joint, values.parts));
-    panel.append(parts.section, joints.section);
+    panel.prepend(overview);
+    panel.append(parts.section);
   } catch {
     if (panel.isConnected && currentId === id && currentTab === "physics") {
       note.textContent = "Physical properties are unavailable.";

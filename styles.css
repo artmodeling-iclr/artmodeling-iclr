@@ -342,41 +342,23 @@ body { background: #fff; color: #171717; font-family: Arial, Helvetica, sans-ser
 .dialog-usd-motion { display: grid; place-items: center; min-width: 0; min-height: 0; height: 100%; padding: 18px; background: #f8f8f8; }
 .dialog-usd-motion video { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; background: #62676f; }
 .dialog-physics { width: min(100%, 1360px); margin-inline: auto; padding: 24px clamp(16px, 3vw, 44px) 36px; }
+.physics-overview { display: flex; align-items: center; justify-content: center; width: min(100%, 640px); height: clamp(280px, 46vh, 400px); margin: 0 auto 18px; overflow: hidden; border: 1px solid #ddd; background: #ededed; }
+.physics-overview img { display: block; width: auto; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
 .physics-note { margin: 0 0 18px; color: #555; font-size: 12px; }
-.physics-group + .physics-group { margin-top: 34px; }
 .physics-group h3 { margin: 0 0 14px; font-size: 20px; letter-spacing: -.02em; }
-.physics-part-grid, .physics-joint-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.physics-part-card, .physics-joint-card { min-width: 0; display: grid; border: 1px solid #d7d7d7; background: #fff; }
-.physics-part-card { grid-template-columns: 165px minmax(0, 1fr); }
-.physics-part-visual, .physics-joint-visual { position: relative; display: grid; place-items: center; min-width: 0; overflow: hidden; background: #ededed; }
-.physics-part-visual { height: 100%; min-height: 165px; }
-.physics-part-visual--empty { padding: 16px; color: #666; font-size: 11px; text-align: center; }
-.physics-part-visual img, .physics-joint-visual img { width: 100%; height: 100%; object-fit: contain; }
-.physics-image-note { position: absolute; right: 6px; bottom: 6px; left: 6px; padding: 4px 6px; background: rgba(255,255,255,.9); color: #444; font-size: 10px; line-height: 1.2; text-align: center; }
-.physics-part-detail, .physics-joint-detail { min-width: 0; padding: 16px; }
+.physics-part-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.physics-part-card { min-width: 0; border: 1px solid #d7d7d7; background: #fff; }
+.physics-part-detail { min-width: 0; padding: 18px; }
 .physics-item-index { display: inline-block; margin-bottom: 5px; color: #606060; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
-.physics-part-card h4, .physics-joint-card h4 { margin: 0 0 14px; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
-.physics-metrics, .physics-material-metrics, .physics-joint-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; margin: 0; }
-.physics-metrics > div, .physics-material-metrics > div, .physics-joint-metrics > div { min-width: 0; }
-.physics-metrics > div:nth-child(n + 3) { grid-column: 1 / -1; }
-.physics-metrics dt, .physics-material-metrics dt, .physics-joint-metrics dt { margin: 0 0 3px; color: #666; font-size: 11px; }
-.physics-metrics dd, .physics-material-metrics dd, .physics-joint-metrics dd { margin: 0; font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
+.physics-part-card h4 { margin: 0 0 14px; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+.physics-metrics, .physics-material-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; margin: 0; }
+.physics-metrics > div, .physics-material-metrics > div { min-width: 0; }
+.physics-metrics dt, .physics-material-metrics dt { margin: 0 0 3px; color: #666; font-size: 11px; }
+.physics-metrics dd, .physics-material-metrics dd { margin: 0; font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
 .physics-material { margin-top: 16px; padding-top: 14px; border-top: 1px solid #e5e5e5; }
 .physics-material h5 { margin: 0 0 10px; font-size: 12px; font-weight: 700; }
-.physics-joint-card { grid-template-columns: 110px minmax(0, 1fr); }
-.physics-joint-card--no-image { grid-template-columns: 1fr; }
-.physics-joint-visual { height: 100%; min-height: 110px; }
-.physics-joint-detail { padding: 13px 15px; }
-.physics-joint-card h4 { margin-bottom: 10px; font-size: 16px; }
 @media (max-width: 1060px) { .structure-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 780px) { .shell { width: min(100% - 36px, 640px); } .section { padding-block: 42px 53px; } .structure-states { grid-column: 1 / -1; } }
-@media (max-width: 900px) { .physics-part-grid, .physics-joint-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 900px) { .physics-part-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 700px) { .dialog-physics { padding: 16px 12px 24px; } }
-@media (max-width: 560px) {
-  .physics-part-card { grid-template-columns: minmax(0, 1fr); }
-  .physics-part-visual { height: 190px; min-height: 0; }
-  .physics-joint-card { grid-template-columns: 90px minmax(0, 1fr); }
-  .physics-joint-visual { height: 90px; min-height: 0; }
-  .physics-joint-metrics { grid-template-columns: minmax(0, 1fr); }
-}
 @media (max-width: 560px) { .shell { width: calc(100% - 28px); } .project-heading { padding: 38px 0 29px; } .project-heading h1 { font-size: 26px; } .project-heading p { font-size: 16px; } .structure-grid { grid-template-columns: 1fr; } .structure-states { grid-column: auto; } .section-heading h2 { font-size: 30px; } .object-grid { grid-template-columns: 1fr; } }
