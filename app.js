@@ -16,6 +16,7 @@ const dialogTitle = document.querySelector("#dialog-title");
 const dialogTabs = [...document.querySelectorAll(".dialog-tabs [role='tab']")];
 let currentId = null;
 let currentTab = "start";
+let physicsDataPromise = null;
 
 const asset = (id, name) => `assets/objects/${id}/${name}.webp`;
 
@@ -69,6 +70,91 @@ function renderGeometryTab(id) {
   dialogContent.append(layout);
 }
 
+function loadPhysicsData() {
+  if (!physicsDataPromise) {
+    physicsDataPromise = fetch("assets/physics.json?v=20261110-physics1").then((response) => {
+      if (!response.ok) throw new Error("Physical properties could not be loaded");
+      return response.json();
+    });
+  }
+  return physicsDataPromise;
+}
+
+function physicalNumber(value, decimals = 5) {
+  return Number(Number(value).toPrecision(3)).toLocaleString("en-US", {
+    maximumFractionDigits: decimals,
+  });
+}
+
+function physicsTable(title, columns, rows) {
+  const section = document.createElement("section");
+  section.className = "physics-group";
+  const heading = document.createElement("h3");
+  heading.textContent = title;
+  const wrapper = document.createElement("div");
+  wrapper.className = "physics-table-wrap";
+  const table = document.createElement("table");
+  table.className = "physics-table";
+  const head = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  for (const [label] of columns) {
+    const cell = document.createElement("th");
+    cell.scope = "col";
+    cell.textContent = label;
+    headerRow.append(cell);
+  }
+  head.append(headerRow);
+  const body = document.createElement("tbody");
+  for (const row of rows) {
+    const tableRow = document.createElement("tr");
+    for (const [label, key, format] of columns) {
+      const cell = document.createElement("td");
+      cell.dataset.label = label;
+      cell.textContent = format ? format(row[key]) : String(row[key]);
+      tableRow.append(cell);
+    }
+    body.append(tableRow);
+  }
+  table.append(head, body);
+  wrapper.append(table);
+  section.append(heading, wrapper);
+  return section;
+}
+
+async function renderPhysicsTab(id) {
+  const panel = document.createElement("div");
+  panel.className = "dialog-physics";
+  const note = document.createElement("p");
+  note.className = "physics-note";
+  note.textContent = "Estimated values";
+  panel.append(note);
+  dialogContent.append(panel);
+
+  try {
+    const all = await loadPhysicsData();
+    if (!panel.isConnected || currentId !== id || currentTab !== "physics") return;
+    const values = all[id];
+    if (!values) throw new Error("Missing physical properties");
+    panel.append(
+      physicsTable("Rigid Body Properties", [
+        ["Mass (kg)", "mass_kg", (value) => physicalNumber(value)],
+        ["Density (kg/m³)", "density_kg_m3", (value) => physicalNumber(value, 0)],
+        ["Static friction", "static_friction", (value) => physicalNumber(value)],
+        ["Dynamic friction", "dynamic_friction", (value) => physicalNumber(value)],
+        ["Material", "material_label"],
+      ], values.rigid_bodies),
+      physicsTable("Joint Drives", [
+        ["Stiffness", "stiffness", (value) => physicalNumber(value)],
+        ["Damping", "damping", (value) => physicalNumber(value)],
+      ], values.joint_drives),
+    );
+  } catch {
+    if (panel.isConnected && currentId === id && currentTab === "physics") {
+      note.textContent = "Physical properties are unavailable.";
+    }
+  }
+}
+
 function selectTab(tab) {
   if (!currentId || !dialogTabs.some((button) => button.dataset.tab === tab)) return;
   currentTab = tab;
@@ -78,9 +164,11 @@ function selectTab(tab) {
     button.tabIndex = selected ? 0 : -1;
   }
   dialogContent.replaceChildren();
+  dialogContent.scrollTop = 0;
   if (["start", "end", "supplemental"].includes(tab)) renderImageTab(currentId, tab);
   else if (tab === "motion") renderMotionTab(currentId);
-  else renderGeometryTab(currentId);
+  else if (tab === "geometry") renderGeometryTab(currentId);
+  else if (tab === "physics") renderPhysicsTab(currentId);
 }
 
 function openInstance(id, tab = "start") {
