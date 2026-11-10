@@ -1,29 +1,19 @@
 const instances = {
-  cabinet16: { title: "Cabinet 16", category: "Cabinet", index: "01 / 09" },
-  cabinet17: { title: "Cabinet 17", category: "Cabinet", index: "02 / 09" },
-  dressing_case2: { title: "Dressing Case 2", category: "Dressing case", index: "03 / 09" },
-  firstkit2: { title: "First Aid Kit 2", category: "First aid kit", index: "04 / 09" },
-  fryer1: { title: "Air Fryer 1", category: "Air fryer", index: "05 / 09" },
-  laptop1: { title: "Laptop 1", category: "Laptop", index: "06 / 09" },
-  microwave1: { title: "Microwave 1", category: "Microwave", index: "07 / 09" },
-  oven4: { title: "Oven 4", category: "Oven", index: "08 / 09" },
-  ricebucket1: { title: "Rice Bucket 1", category: "Rice bucket", index: "09 / 09" },
-};
-
-const notes = {
-  start: "Normal-pose RGB capture at the start articulation state.",
-  end: "Normal-pose RGB capture at the end articulation state.",
-  supplemental: "A repositioned capture reveals surfaces hidden in the normal pose. Its folder name does not describe articulation state.",
-  motion: "Selected interaction frames, shown in RGB and colorized depth.",
-  geometry: "Geometry preview exported from the USD asset. Colors are approximate; the source materials are not reproduced here.",
+  cabinet16: { title: "Cabinet 16", category: "Cabinet" },
+  cabinet17: { title: "Cabinet 17", category: "Cabinet" },
+  dressing_case2: { title: "Dressing Case 2", category: "Dressing case" },
+  firstkit2: { title: "First Aid Kit 2", category: "First aid kit" },
+  fryer1: { title: "Air Fryer 1", category: "Air fryer" },
+  laptop1: { title: "Laptop 1", category: "Laptop" },
+  microwave1: { title: "Microwave 1", category: "Microwave" },
+  oven4: { title: "Oven 4", category: "Oven" },
+  ricebucket1: { title: "Rice Bucket 1", category: "Rice bucket" },
 };
 
 const dialog = document.querySelector("#instance-dialog");
 const dialogContent = document.querySelector("#dialog-content");
 const dialogTitle = document.querySelector("#dialog-title");
 const dialogCategory = document.querySelector("#dialog-category");
-const dialogNote = document.querySelector("#dialog-note");
-const dialogCounter = document.querySelector("#dialog-counter");
 const dialogTabs = [...document.querySelectorAll(".dialog-tabs [role='tab']")];
 let currentId = null;
 let currentTab = "start";
@@ -80,15 +70,12 @@ function renderGeometryTab(id) {
   viewer.addEventListener("load", () => viewerWrap.classList.add("is-ready"));
   viewer.addEventListener("error", () => viewerWrap.classList.add("has-error"));
   viewerWrap.append(fallback, viewer);
-  const info = document.createElement("aside");
-  info.className = "geometry-note";
-  info.innerHTML = '<span class="geometry-symbol" aria-hidden="true">✳</span><h3>Explore the shape</h3><p>Drag to rotate and scroll to zoom. This lightweight preview is derived from the articulated USD geometry; source textures are omitted.</p>';
-  layout.append(viewerWrap, info);
+  layout.append(viewerWrap);
   dialogContent.append(layout);
 }
 
 function selectTab(tab) {
-  if (!currentId || !notes[tab]) return;
+  if (!currentId || !dialogTabs.some((button) => button.dataset.tab === tab)) return;
   currentTab = tab;
   for (const button of dialogTabs) {
     const selected = button.dataset.tab === tab;
@@ -99,7 +86,6 @@ function selectTab(tab) {
   if (["start", "end", "supplemental"].includes(tab)) renderImageTab(currentId, tab);
   else if (tab === "motion") renderMotionTab(currentId);
   else renderGeometryTab(currentId);
-  dialogNote.textContent = notes[tab];
 }
 
 function openInstance(id, tab = "start") {
@@ -108,13 +94,12 @@ function openInstance(id, tab = "start") {
   currentId = id;
   dialogTitle.textContent = instance.title;
   dialogCategory.textContent = `${instance.category.toUpperCase()} / ${id}`;
-  dialogCounter.textContent = instance.index;
   selectTab(tab);
   if (!dialog.open) dialog.showModal();
 }
 
-document.querySelectorAll(".object-card, [data-open]").forEach((button) => {
-  button.addEventListener("click", () => openInstance(button.dataset.id || button.dataset.open, button.dataset.tab || "start"));
+document.querySelectorAll(".object-card").forEach((button) => {
+  button.addEventListener("click", () => openInstance(button.dataset.id));
 });
 
 document.querySelector("#dialog-close").addEventListener("click", () => dialog.close());

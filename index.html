@@ -23,31 +23,25 @@
       <div class="section-heading structure-heading">
         <div>
           <p class="section-kicker">01 / THE DATA</p>
-          <h2 id="structure-title">One object. <em>More than one view.</em></h2>
+          <h2 id="structure-title">Captured Object Views</h2>
         </div>
-        <p>Each featured instance includes normal-pose captures at two articulation states, a separate pose for otherwise hidden surfaces, and an RGB and depth interaction sequence. The matching USD asset provides articulated geometry.</p>
       </div>
       <div class="structure-grid">
         <article class="structure-card structure-states">
-          <div class="structure-card-heading"><span class="step-number">01</span><div><h3>Articulation states</h3><p>Normal-pose captures at start and end.</p></div></div>
+          <div class="structure-card-heading"><span class="step-number">01</span><h3>Articulation States</h3></div>
           <div class="state-pair">
             <figure><img src="assets/objects/cabinet16/start.webp" alt="Cabinet 16 captured at its start state"><figcaption>START</figcaption></figure>
             <figure><img src="assets/objects/cabinet16/end.webp" alt="Cabinet 16 captured at its end state"><figcaption>END</figcaption></figure>
           </div>
         </article>
         <article class="structure-card structure-extra">
-          <div class="structure-card-heading"><span class="step-number">02</span><div><h3>Supplemental views</h3><p>A repositioned object reveals hidden surfaces.</p></div></div>
+          <div class="structure-card-heading"><span class="step-number">02</span><h3>Supplemental Views</h3></div>
           <figure class="structure-image"><img src="assets/objects/cabinet16/supplemental.webp" alt="Cabinet 16 photographed from a supplemental pose to reveal its underside"><figcaption>ADDITIONAL POSE</figcaption></figure>
         </article>
         <article class="structure-card structure-mask">
-          <div class="structure-card-heading"><span class="step-number">03</span><div><h3>Object masks</h3><p>Matched frames isolate the object.</p></div></div>
+          <div class="structure-card-heading"><span class="step-number">03</span><h3>Object Masks</h3></div>
           <figure class="structure-image mask-image"><img src="assets/objects/cabinet16/end-mask.webp" alt="Cabinet 16 isolated on a black background"><figcaption>MASKED RGB</figcaption></figure>
         </article>
-      </div>
-      <div class="asset-callout">
-        <span class="asset-callout-symbol" aria-hidden="true">✳</span>
-        <p><strong>From capture to digital asset.</strong> The nine featured objects also have articulated USD models. Open any instance below to rotate a lightweight geometry preview.</p>
-        <button type="button" class="callout-link" data-open="cabinet16" data-tab="geometry">View a 3D example <span aria-hidden="true">↗</span></button>
       </div>
     </section>
 
@@ -56,9 +50,8 @@
         <div class="section-heading instances-heading">
           <div>
             <p class="section-kicker">02 / INSTANCE EXPLORER</p>
-            <h2 id="instances-title">Nine instances.<br><em>Eight categories.</em></h2>
+            <h2 id="instances-title">Nine Instances · Eight Categories</h2>
           </div>
-          <p>Browse a focused sample of the collection. Select an object to compare capture states, see the supplemental view, watch RGB and depth interaction, and inspect its USD-derived geometry.</p>
         </div>
         <div class="filter-bar" role="group" aria-label="Filter instances">
           <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">All instances <span>09</span></button>
@@ -109,14 +102,12 @@
 
     <section class="section motion-section shell" id="motion" aria-labelledby="motion-title">
       <div class="section-heading motion-heading">
-        <div><p class="section-kicker">03 / INTERACTION</p><h2 id="motion-title">Motion in color.<br><em>Structure in depth.</em></h2></div>
-        <p>Real interactions are recorded as aligned RGB and depth sequences. These short excerpts show how the articulated parts move in their physical setting.</p>
+        <div><p class="section-kicker">03 / INTERACTION</p><h2 id="motion-title">RGB and Depth Interactions</h2></div>
       </div>
       <div class="motion-pair">
-        <figure class="motion-frame"><div class="motion-frame-top"><span>01 / RGB CAPTURE</span><span class="live-dot" aria-hidden="true"></span></div><img class="animated-preview" src="assets/objects/cabinet16/motion.webp" data-still="assets/objects/cabinet16/end.webp" alt="Interaction sequence of a drawer cabinet opening"><figcaption>cabinet16 <span>Real-world interaction</span></figcaption></figure>
-        <figure class="motion-frame depth-frame"><div class="motion-frame-top"><span>02 / DEPTH CAPTURE</span><span class="depth-key" aria-hidden="true"></span></div><img class="animated-preview" src="assets/objects/cabinet16/depth.webp" data-still="assets/objects/cabinet16/end.webp" alt="Colorized depth sequence of the same drawer cabinet interaction"><figcaption>cabinet16 <span>Colorized depth</span></figcaption></figure>
+        <figure class="motion-frame"><div class="motion-frame-top"><span>01 / RGB CAPTURE</span><span class="live-dot" aria-hidden="true"></span></div><img class="animated-preview" src="assets/objects/cabinet16/motion.webp" data-still="assets/objects/cabinet16/end.webp" alt="Interaction sequence of a drawer cabinet opening"><figcaption>cabinet16</figcaption></figure>
+        <figure class="motion-frame depth-frame"><div class="motion-frame-top"><span>02 / DEPTH CAPTURE</span><span class="depth-key" aria-hidden="true"></span></div><img class="animated-preview" src="assets/objects/cabinet16/depth.webp" data-still="assets/objects/cabinet16/end.webp" alt="Colorized depth sequence of the same drawer cabinet interaction"><figcaption>cabinet16</figcaption></figure>
       </div>
-      <p class="motion-note">Select any instance above to view its own RGB and depth sequence.</p>
     </section>
   </main>
 
@@ -131,7 +122,6 @@
         <button type="button" role="tab" data-tab="geometry" aria-selected="false">3D geometry</button>
       </div>
       <div class="dialog-content" id="dialog-content" role="tabpanel"></div>
-      <div class="dialog-footer"><span id="dialog-note"></span><span class="dialog-counter" id="dialog-counter"></span></div>
     </div>
   </dialog>
 </body>
