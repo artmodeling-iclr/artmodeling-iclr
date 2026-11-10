@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="ArtModeling: an instance-matched collection of articulated objects, real observations, interaction sequences and USD assets.">
+  <title>ArtModeling — Articulated Objects in the Real World</title>
+  <link rel="preload" href="assets/objects/cabinet16/poster.webp" as="image">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <main id="main">
+    <section class="project-heading shell" id="top" aria-labelledby="project-title">
+      <h1 id="project-title">ArtModeling: An Instance-Matched Dataset and Benchmark for Articulated-Object Perception and Dynamics</h1>
+      <p>Anonymous Authors</p>
+    </section>
+
+    <section class="section structure-section shell" id="structure" aria-labelledby="structure-title">
+      <div class="section-heading structure-heading">
+        <div>
+          <p class="section-kicker">01 / THE DATA</p>
+          <h2 id="structure-title">One object. <em>More than one view.</em></h2>
+        </div>
+        <p>Each featured instance includes normal-pose captures at two articulation states, a separate pose for otherwise hidden surfaces, and an RGB and depth interaction sequence. The matching USD asset provides articulated geometry.</p>
+      </div>
+      <div class="structure-grid">
+        <article class="structure-card structure-states">
+          <div class="structure-card-heading"><span class="step-number">01</span><div><h3>Articulation states</h3><p>Normal-pose captures at start and end.</p></div></div>
+          <div class="state-pair">
+            <figure><img src="assets/objects/cabinet16/start.webp" alt="Cabinet 16 captured at its start state"><figcaption>START</figcaption></figure>
+            <figure><img src="assets/objects/cabinet16/end.webp" alt="Cabinet 16 captured at its end state"><figcaption>END</figcaption></figure>
+          </div>
+        </article>
+        <article class="structure-card structure-extra">
+          <div class="structure-card-heading"><span class="step-number">02</span><div><h3>Supplemental views</h3><p>A repositioned object reveals hidden surfaces.</p></div></div>
+          <figure class="structure-image"><img src="assets/objects/cabinet16/supplemental.webp" alt="Cabinet 16 photographed from a supplemental pose to reveal its underside"><figcaption>ADDITIONAL POSE</figcaption></figure>
+        </article>
+        <article class="structure-card structure-mask">
+          <div class="structure-card-heading"><span class="step-number">03</span><div><h3>Object masks</h3><p>Matched frames isolate the object.</p></div></div>
+          <figure class="structure-image mask-image"><img src="assets/objects/cabinet16/end-mask.webp" alt="Cabinet 16 isolated on a black background"><figcaption>MASKED RGB</figcaption></figure>
+        </article>
+      </div>
+      <div class="asset-callout">
+        <span class="asset-callout-symbol" aria-hidden="true">✳</span>
+        <p><strong>From capture to digital asset.</strong> The nine featured objects also have articulated USD models. Open any instance below to rotate a lightweight geometry preview.</p>
+        <button type="button" class="callout-link" data-open="cabinet16" data-tab="geometry">View a 3D example <span aria-hidden="true">↗</span></button>
+      </div>
+    </section>
+
+    <section class="section instances-section" id="instances" aria-labelledby="instances-title">
+      <div class="shell">
+        <div class="section-heading instances-heading">
+          <div>
+            <p class="section-kicker">02 / INSTANCE EXPLORER</p>
+            <h2 id="instances-title">Nine instances.<br><em>Eight categories.</em></h2>
+          </div>
+          <p>Browse a focused sample of the collection. Select an object to compare capture states, see the supplemental view, watch RGB and depth interaction, and inspect its USD-derived geometry.</p>
+        </div>
+        <div class="filter-bar" role="group" aria-label="Filter instances">
+          <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">All instances <span>09</span></button>
+          <button class="filter-button" type="button" data-filter="storage" aria-pressed="false">Storage & cases <span>05</span></button>
+          <button class="filter-button" type="button" data-filter="appliance" aria-pressed="false">Appliances <span>03</span></button>
+          <button class="filter-button" type="button" data-filter="electronics" aria-pressed="false">Electronics <span>01</span></button>
+        </div>
+        <div class="object-grid" id="object-grid">
+          <button type="button" class="object-card" data-id="cabinet16" data-group="storage" data-tone="slate" aria-label="Explore Cabinet 16">
+            <span class="object-visual"><span class="card-index">01 / 09</span><img src="assets/objects/cabinet16/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">CABINET</span><strong>Cabinet 16</strong><span class="object-id">cabinet16</span></span>
+          </button>
+          <button type="button" class="object-card" data-id="cabinet17" data-group="storage" data-tone="sage" aria-label="Explore Cabinet 17">
+            <span class="object-visual"><span class="card-index">02 / 09</span><img src="assets/objects/cabinet17/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">CABINET</span><strong>Cabinet 17</strong><span class="object-id">cabinet17</span></span>
+          </button>
+          <button type="button" class="object-card" data-id="dressing_case2" data-group="storage" data-tone="amber" aria-label="Explore Dressing Case 2">
+            <span class="object-visual"><span class="card-index">03 / 09</span><img src="assets/objects/dressing_case2/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">DRESSING CASE</span><strong>Dressing Case 2</strong><span class="object-id">dressing_case2</span></span>
+          </button>
+          <button type="button" class="object-card" data-id="firstkit2" data-group="storage" data-tone="mint" aria-label="Explore First Aid Kit 2">
+            <span class="object-visual"><span class="card-index">04 / 09</span><img src="assets/objects/firstkit2/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">FIRST AID KIT</span><strong>First Aid Kit 2</strong><span class="object-id">firstkit2</span></span>
+          </button>
+          <button type="button" class="object-card" data-id="fryer1" data-group="appliance" data-tone="lime" aria-label="Explore Air Fryer 1">
+            <span class="object-visual"><span class="card-index">05 / 09</span><img src="assets/objects/fryer1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">AIR FRYER</span><strong>Air Fryer 1</strong><span class="object-id">fryer1</span></span>
+          </button>
+          <button type="button" class="object-card" data-id="laptop1" data-group="electronics" data-tone="silver" aria-label="Explore Laptop 1">
+            <span class="object-visual"><span class="card-index">06 / 09</span><img src="assets/objects/laptop1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">LAPTOP</span><strong>Laptop 1</strong><span class="object-id">laptop1</span></span>
+          </button>
+          <button type="button" class="object-card" data-id="microwave1" data-group="appliance" data-tone="ice" aria-label="Explore Microwave 1">
+            <span class="object-visual"><span class="card-index">07 / 09</span><img src="assets/objects/microwave1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">MICROWAVE</span><strong>Microwave 1</strong><span class="object-id">microwave1</span></span>
+          </button>
+          <button type="button" class="object-card" data-id="oven4" data-group="appliance" data-tone="coral" aria-label="Explore Oven 4">
+            <span class="object-visual"><span class="card-index">08 / 09</span><img src="assets/objects/oven4/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">OVEN</span><strong>Oven 4</strong><span class="object-id">oven4</span></span>
+          </button>
+          <button type="button" class="object-card" data-id="ricebucket1" data-group="storage" data-tone="cream" aria-label="Explore Rice Bucket 1">
+            <span class="object-visual"><span class="card-index">09 / 09</span><img src="assets/objects/ricebucket1/poster.webp" alt=""><span class="card-visual-arrow" aria-hidden="true">↗</span></span>
+            <span class="object-info"><span class="object-type">RICE BUCKET</span><strong>Rice Bucket 1</strong><span class="object-id">ricebucket1</span></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section motion-section shell" id="motion" aria-labelledby="motion-title">
+      <div class="section-heading motion-heading">
+        <div><p class="section-kicker">03 / INTERACTION</p><h2 id="motion-title">Motion in color.<br><em>Structure in depth.</em></h2></div>
+        <p>Real interactions are recorded as aligned RGB and depth sequences. These short excerpts show how the articulated parts move in their physical setting.</p>
+      </div>
+      <div class="motion-pair">
+        <figure class="motion-frame"><div class="motion-frame-top"><span>01 / RGB CAPTURE</span><span class="live-dot" aria-hidden="true"></span></div><img class="animated-preview" src="assets/objects/cabinet16/motion.webp" data-still="assets/objects/cabinet16/end.webp" alt="Interaction sequence of a drawer cabinet opening"><figcaption>cabinet16 <span>Real-world interaction</span></figcaption></figure>
+        <figure class="motion-frame depth-frame"><div class="motion-frame-top"><span>02 / DEPTH CAPTURE</span><span class="depth-key" aria-hidden="true"></span></div><img class="animated-preview" src="assets/objects/cabinet16/depth.webp" data-still="assets/objects/cabinet16/end.webp" alt="Colorized depth sequence of the same drawer cabinet interaction"><figcaption>cabinet16 <span>Colorized depth</span></figcaption></figure>
+      </div>
+      <p class="motion-note">Select any instance above to view its own RGB and depth sequence.</p>
+    </section>
+  </main>
+
+  <dialog class="instance-dialog" id="instance-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-header"><div><p class="dialog-eyebrow" id="dialog-category"></p><h2 id="dialog-title"></h2></div><button type="button" class="dialog-close" id="dialog-close" aria-label="Close instance viewer">×</button></div>
+      <div class="dialog-tabs" role="tablist" aria-label="Instance media">
+        <button type="button" role="tab" data-tab="start" aria-selected="true">Start state</button>
+        <button type="button" role="tab" data-tab="end" aria-selected="false">End state</button>
+        <button type="button" role="tab" data-tab="supplemental" aria-selected="false">Extra view</button>
+        <button type="button" role="tab" data-tab="motion" aria-selected="false">Interaction</button>
+        <button type="button" role="tab" data-tab="geometry" aria-selected="false">3D geometry</button>
+      </div>
+      <div class="dialog-content" id="dialog-content" role="tabpanel"></div>
+      <div class="dialog-footer"><span id="dialog-note"></span><span class="dialog-counter" id="dialog-counter"></span></div>
+    </div>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "cabinet16",
+    "category": "Cabinet",
+    "tone": "slate"
+  },
+  {
+    "id": "cabinet17",
+    "category": "Cabinet",
+    "tone": "sage"
+  },
+  {
+    "id": "dressing_case2",
+    "category": "Dressing case",
+    "tone": "amber"
+  },
+  {
+    "id": "firstkit2",
+    "category": "First aid kit",
+    "tone": "mint"
+  },
+  {
+    "id": "fryer1",
+    "category": "Air fryer",
+    "tone": "lime"
+  },
+  {
+    "id": "laptop1",
+    "category": "Laptop",
+    "tone": "silver"
+  },
+  {
+    "id": "microwave1",
+    "category": "Microwave",
+    "tone": "ice"
+  },
+  {
+    "id": "oven4",
+    "category": "Oven",
+    "tone": "coral"
+  },
+  {
+    "id": "ricebucket1",
+    "category": "Rice bucket",
+    "tone": "cream"
+  }
+]
