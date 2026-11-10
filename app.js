@@ -55,8 +55,8 @@ function renderGeometryTab(id) {
   const layout = document.createElement("div");
   layout.className = "dialog-usd-motion";
   const video = document.createElement("video");
-  video.src = `assets/motion/${id}.mp4`;
-  video.poster = asset(id, "poster");
+  video.src = `assets/motion/${id}.mp4?v=20261110-textures3`;
+  video.poster = `${asset(id, "poster")}?v=20261110-front2`;
   video.autoplay = true;
   video.loop = true;
   video.muted = true;
