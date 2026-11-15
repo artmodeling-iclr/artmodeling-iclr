@@ -73,7 +73,7 @@ function renderGeometryTab(id) {
 
 function loadPhysicsData() {
   if (!physicsDataPromise) {
-    physicsDataPromise = fetch("assets/physics.json?v=20261110-physics3").then((response) => {
+    physicsDataPromise = fetch("assets/physics.json?v=20261115-material-rebalance1").then((response) => {
       if (!response.ok) throw new Error("Physical properties could not be loaded");
       return response.json();
     });
@@ -132,7 +132,7 @@ function partCard(part) {
   name.textContent = part.name;
   detail.append(label, name, physicsMetrics([
     ["Mass", `${physicalNumber(part.mass_kg)} kg`],
-    ["Bulk density", `${physicalNumber(part.effective_bulk_density_kg_m3)} kg/m³`],
+    ["Envelope density", `${physicalNumber(part.effective_bulk_density_kg_m3)} kg/m³`],
   ]));
   for (const material of part.materials || []) {
     const materialBlock = document.createElement("div");
@@ -168,6 +168,8 @@ async function renderPhysicsTab(id) {
       note.textContent = "Updated physical properties are not available for this instance.";
       return;
     }
+    const totalMass = values.parts.reduce((sum, part) => sum + part.mass_kg, 0);
+    note.textContent = `Estimated part values · Total mass: ${physicalNumber(totalMass)} kg`;
     const overview = document.createElement("figure");
     overview.className = "physics-overview";
     overview.append(physicsImage(values.image, `${instances[id].title} complete asset render`));
