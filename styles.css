@@ -364,16 +364,26 @@ body { background: #fff; color: #171717; font-family: Arial, Helvetica, sans-ser
 @media (max-width: 560px) { .shell { width: calc(100% - 28px); } .project-heading { padding: 38px 0 29px; } .project-heading h1 { font-size: 26px; } .project-heading p { font-size: 16px; } .structure-grid { grid-template-columns: 1fr; } .structure-states { grid-column: auto; } .section-heading h2 { font-size: 30px; } .object-grid { grid-template-columns: 1fr; } }
 
 /* Experiment and asset comparison sections follow the existing square media cards. */
-.experiment-frame, .comparison-frame { overflow: hidden; border: 1px solid #d9d9d9; background: #fff; }
+.experiment-frame, .comparison-viewport { overflow: hidden; border: 1px solid #d9d9d9; background: #fff; }
 .experiment-frame video { display: block; width: 100%; aspect-ratio: 32 / 9; object-fit: contain; background: #f5f5f5; }
-.experiment-frame figcaption, .comparison-frame figcaption { padding: 16px 20px; border-top: 1px solid #d9d9d9; color: #171717; font-size: 15px; font-weight: 700; }
-.comparison-list { display: grid; gap: 20px; }
-.comparison-frame img { display: block; width: 100%; height: auto; }
-.comparison-frame figcaption { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.comparison-frame figcaption a { padding-bottom: 2px; border-bottom: 1px solid #555; color: #333; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.comparison-frame figcaption a:hover { color: #000; border-color: #000; }
+.experiment-frame figcaption { padding: 16px 20px; border-top: 1px solid #d9d9d9; color: #171717; font-size: 15px; font-weight: 700; }
+.comparison-carousel { position: relative; }
+.comparison-viewport { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+.comparison-viewport::-webkit-scrollbar { display: none; }
+.comparison-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+.comparison-slide img { display: block; width: 100%; height: auto; }
+.comparison-arrow { position: absolute; z-index: 2; top: 50%; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; transform: translateY(-50%); border: 1px solid #777; border-radius: 0; background: #fff; color: #111; font-size: 30px; line-height: 1; box-shadow: 0 2px 8px #0002; }
+.comparison-arrow:hover { border-color: #111; background: #111; color: #fff; }
+.comparison-arrow-prev { left: 12px; }
+.comparison-arrow-next { right: 12px; }
+.comparison-dots { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 12px; margin-top: 18px; }
+.comparison-dots button { width: 10px; height: 10px; padding: 0; border: 1px solid #111; border-radius: 50%; background: #fff; }
+.comparison-dots button[aria-current="true"] { background: #111; }
 @media (max-width: 560px) {
   .experiment-frame video { aspect-ratio: 16 / 9; }
-  .experiment-frame figcaption, .comparison-frame figcaption { padding: 14px 16px; font-size: 14px; }
-  .comparison-list { gap: 16px; }
+  .experiment-frame figcaption { padding: 14px 16px; font-size: 14px; }
+  .comparison-arrow { width: 32px; height: 36px; font-size: 25px; }
+  .comparison-arrow-prev { left: 5px; }
+  .comparison-arrow-next { right: 5px; }
 }
+@media (prefers-reduced-motion: reduce) { .comparison-viewport { scroll-behavior: auto; } }
