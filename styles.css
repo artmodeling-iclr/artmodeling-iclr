@@ -387,3 +387,19 @@ body { background: #fff; color: #171717; font-family: Arial, Helvetica, sans-ser
   .comparison-arrow-next { right: 5px; }
 }
 @media (prefers-reduced-motion: reduce) { .comparison-viewport { scroll-behavior: auto; } }
+
+/* Chapter links for sharing a specific section of the project page. */
+.contents-section { padding-block: 34px 48px; border-top: 1px solid #ddd; }
+.contents-section h2 { margin: 0 0 24px; text-align: center; font-size: clamp(27px, 2.7vw, 37px); line-height: 1.2; letter-spacing: -.025em; }
+.contents-table { width: min(100%, 930px); margin-inline: auto; border-collapse: collapse; table-layout: fixed; }
+.contents-table th, .contents-table td { width: 50%; padding: 14px 18px; border-bottom: 1px solid #ddd; text-align: left; overflow-wrap: anywhere; }
+.contents-table thead th { border-top: 1px solid #ddd; background: #f5f5f5; color: #555; font-size: 13px; font-weight: 700; }
+.contents-table tbody th { font-size: 16px; font-weight: 500; }
+.contents-table tbody td a { display: inline-block; max-width: 100%; padding: 4px 8px; border-bottom: 1px solid #888; background: #f5f5f5; color: #222; font: 13px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+.contents-table tbody td a:hover { border-color: #111; color: #000; }
+@media (max-width: 560px) {
+  .contents-section { padding-block: 28px 38px; }
+  .contents-table th, .contents-table td { padding: 11px 8px; }
+  .contents-table tbody th { font-size: 13px; }
+  .contents-table tbody td a { padding: 3px 5px; font-size: 11px; }
+}
