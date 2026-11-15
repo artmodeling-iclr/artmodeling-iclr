@@ -8,6 +8,7 @@
 
     const slides = Array.from(viewport.querySelectorAll(".comparison-slide"));
     if (!slides.length) return;
+    const videos = slides.map((slide) => slide.querySelector("video"));
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const dots = slides.map((slide, index) => {
@@ -21,7 +22,7 @@
       return dot;
     });
 
-    let activeIndex = 0;
+    let activeIndex = -1;
     let requestedIndex = null;
     let scrollFrame = 0;
     let settleTimer = 0;
@@ -31,11 +32,23 @@
     }
 
     function showActive(index) {
+      const changed = index !== activeIndex;
       activeIndex = index;
       dots.forEach((dot, dotIndex) => {
         if (dotIndex === index) dot.setAttribute("aria-current", "true");
         else dot.removeAttribute("aria-current");
       });
+      if (changed) {
+        videos.forEach((video, videoIndex) => {
+          if (!video) return;
+          if (videoIndex === index) {
+            const playback = video.play();
+            if (playback) playback.catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      }
     }
 
     function indexFromScroll() {
@@ -84,6 +97,7 @@
     }, { passive: true });
 
     viewport.addEventListener("keydown", (event) => {
+      if (event.target instanceof HTMLMediaElement) return;
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
         goTo((requestedIndex ?? activeIndex) + (event.key === "ArrowRight" ? 1 : -1));
