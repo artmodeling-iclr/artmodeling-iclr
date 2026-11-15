@@ -362,3 +362,18 @@ body { background: #fff; color: #171717; font-family: Arial, Helvetica, sans-ser
 @media (max-width: 900px) { .physics-part-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 700px) { .dialog-physics { padding: 16px 12px 24px; } }
 @media (max-width: 560px) { .shell { width: calc(100% - 28px); } .project-heading { padding: 38px 0 29px; } .project-heading h1 { font-size: 26px; } .project-heading p { font-size: 16px; } .structure-grid { grid-template-columns: 1fr; } .structure-states { grid-column: auto; } .section-heading h2 { font-size: 30px; } .object-grid { grid-template-columns: 1fr; } }
+
+/* Experiment and asset comparison sections follow the existing square media cards. */
+.experiment-frame, .comparison-frame { overflow: hidden; border: 1px solid #d9d9d9; background: #fff; }
+.experiment-frame video { display: block; width: 100%; aspect-ratio: 32 / 9; object-fit: contain; background: #f5f5f5; }
+.experiment-frame figcaption, .comparison-frame figcaption { padding: 16px 20px; border-top: 1px solid #d9d9d9; color: #171717; font-size: 15px; font-weight: 700; }
+.comparison-list { display: grid; gap: 20px; }
+.comparison-frame img { display: block; width: 100%; height: auto; }
+.comparison-frame figcaption { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.comparison-frame figcaption a { padding-bottom: 2px; border-bottom: 1px solid #555; color: #333; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.comparison-frame figcaption a:hover { color: #000; border-color: #000; }
+@media (max-width: 560px) {
+  .experiment-frame video { aspect-ratio: 16 / 9; }
+  .experiment-frame figcaption, .comparison-frame figcaption { padding: 14px 16px; font-size: 14px; }
+  .comparison-list { gap: 16px; }
+}
