@@ -373,8 +373,8 @@ body { background: #fff; color: #171717; font-family: Arial, Helvetica, sans-ser
 .comparison-slide { flex: 0 0 100%; display: grid; grid-template-columns: minmax(0, 32fr) minmax(0, 68fr); gap: 12px; min-width: 0; padding: 14px; scroll-snap-align: start; }
 .comparison-real-panel, .comparison-video-panel { min-width: 0; }
 .comparison-panel-label { display: block; min-height: 26px; padding: 0 2px 8px; color: #303841; font-size: 12px; font-weight: 700; }
-.comparison-real-image { display: grid; place-items: center; width: 100%; aspect-ratio: 1.18; overflow: hidden; padding: 12px; border: 1px solid #d8dde3; background: #e9edf1; }
-.comparison-real-image img { width: 100%; height: 100%; object-fit: contain; }
+.comparison-real-image { position: relative; width: 100%; aspect-ratio: 1.18; overflow: hidden; border: 1px solid #d8dde3; background: #e9edf1; }
+.comparison-real-image img { position: absolute; inset: 12px; width: calc(100% - 24px); height: calc(100% - 24px); object-fit: contain; }
 .comparison-slide video { display: block; width: 100%; aspect-ratio: 2046 / 810; object-fit: contain; background: #e9edf1; }
 .comparison-arrow { position: absolute; z-index: 2; top: 50%; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; transform: translateY(-50%); border: 1px solid #777; border-radius: 0; background: #fff; color: #111; font-size: 30px; line-height: 1; box-shadow: 0 2px 8px #0002; }
 .comparison-arrow:hover { border-color: #111; background: #111; color: #fff; }
