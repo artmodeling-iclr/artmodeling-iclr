@@ -737,6 +737,7 @@
         .mode-banner p { margin: 0; }
         .mode-banner a { flex: none; display: inline-block; padding: 8px 12px; border: 1px solid #171717; background: #171717; color: #fff; text-decoration: none; font-weight: 700; }
         .mode-banner a:hover { background: #333; }
+        .mode-downloads { display: flex; flex: none; flex-wrap: wrap; gap: 8px; }
         .workflow-strip { gap: 10px; margin: 18px 0; }
         .workflow-step { min-height: 0; padding: 12px 13px; border-radius: 0; box-shadow: none; }
         .workflow-step b { margin-bottom: 4px; font-size: 13px; }
@@ -797,10 +798,11 @@
 
     <div class="mode-banner" id="hostedModeNotice" role="status" hidden>
         <p><strong>Online preview.</strong> Loading and saving USD files requires the local Python service. Download the workbench and follow its README to run the full editor on your computer.</p>
-        <a href="solveradapt-local.zip" download>Download local workbench &rarr;</a>
+        <div class="mode-downloads"><a href="solveradapt-local.zip" download>Download local workbench &rarr;</a><a href="model.zip" download>Download sample USD models &rarr;</a></div>
     </div>
     <div class="mode-banner" id="localModeNotice" role="status" hidden>
         <p><strong>Local workbench.</strong> Choose a USD file or enter its path to inspect joints and edit physical properties.</p>
+        <a href="model.zip" download>Download sample USD models &rarr;</a>
     </div>
 
     <div class="workflow-strip" aria-label="Workflow">
