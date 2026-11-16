@@ -1,0 +1,3841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SolverAdapt: inspect and tune physical properties and joint motion in articulated USD assets." />
+    <title>SolverAdapt — USD Physics Workbench</title>
+    <style>
+        :root {
+            --page-bg: #eef2f6;
+            --surface: #ffffff;
+            --surface-soft: #f7f9fb;
+            --surface-strong: #111827;
+            --line: #d9e1e8;
+            --line-strong: #aab7c4;
+            --text: #17202a;
+            --muted: #617080;
+            --accent: #0f766e;
+            --accent-strong: #115e59;
+            --accent-soft: #e1f4f1;
+            --warn: #b45309;
+            --danger: #dc2626;
+            --shadow: 0 18px 42px rgba(24, 39, 75, 0.12);
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                linear-gradient(180deg, #eef2f6 0%, #f8fafc 42%, #eef2f6 100%);
+            color: var(--text);
+        }
+        .container {
+            width: min(1560px, calc(100% - 40px));
+            margin: 20px auto 32px;
+        }
+        h1 {
+            margin: 0;
+            font-size: clamp(30px, 4.2vw, 54px);
+            line-height: 1.08;
+            letter-spacing: 0;
+        }
+        .desc {
+            max-width: 920px;
+            color: #dce7f3;
+            font-size: 16px;
+            line-height: 1.75;
+            margin: 18px 0 0;
+        }
+        .app-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.65fr);
+            gap: 28px;
+            align-items: stretch;
+            min-height: 390px;
+            padding: 36px;
+            color: #fff;
+            background:
+                linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(22, 78, 99, 0.96));
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .hero-copy {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+        }
+        .eyebrow {
+            margin: 0 0 14px;
+            color: #9de3d9;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 24px;
+        }
+        .button-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 10px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            border-radius: 6px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .button-link.primary {
+            color: #063a36;
+            background: #9de3d9;
+            border-color: #9de3d9;
+        }
+        .hero-panel {
+            display: grid;
+            gap: 12px;
+            align-content: center;
+            min-width: 0;
+        }
+        .hero-card {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+        }
+        .hero-card-title {
+            margin: 0 0 8px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .hero-card-text {
+            margin: 0;
+            color: #d7e5ef;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+        .workflow-strip {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin: 16px 0 20px;
+        }
+        .workflow-step {
+            min-height: 104px;
+            padding: 16px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 10px 24px rgba(24, 39, 75, 0.06);
+        }
+        .workflow-step b {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--accent-strong);
+            font-size: 15px;
+        }
+        .workflow-step span {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+        .hidden-scene-meta {
+            display: grid;
+            grid-template-columns: minmax(280px, 1.4fr) minmax(220px, 0.9fr) minmax(130px, 0.45fr);
+            gap: 12px;
+            margin: 0 0 16px;
+        }
+        .metric-card {
+            min-width: 0;
+            padding: 14px 16px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+        .metric-label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+        .metric-value {
+            color: var(--text);
+            font-family: Consolas, Menlo, monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 26px 0 12px;
+            font-size: 19px;
+            font-weight: 800;
+        }
+        .section-title::before {
+            content: "";
+            width: 8px;
+            height: 26px;
+            border-radius: 3px;
+            background: var(--accent);
+        }
+        .grid, .grid-3, .grid-4 {
+            display: grid;
+            gap: 14px;
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+        .grid { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+        .field { min-width: 0; }
+        label { display: block; font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+        .box {
+            min-height: 34px;
+            padding: 9px 10px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            font-size: 13px;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+        .live-box {
+            min-height: 62px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+        }
+        .live-title { color: #666; font-size: 12px; margin-bottom: 6px; }
+        .live-value { font-size: 22px; font-weight: bold; font-family: Consolas, Menlo, monospace; }
+        .small { color: var(--muted); font-size: 12px; margin-top: 4px; line-height: 1.5; }
+        .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .limit-row {
+            display: grid;
+            grid-template-columns: 64px minmax(0, 240px);
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .limit-row .small {
+            margin: 0;
+        }
+        .limit-row input[type="number"] {
+            width: 100%;
+        }
+        button {
+            min-height: 40px;
+            padding: 8px 13px;
+            border: 1px solid var(--line-strong);
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        button:hover { background: #eef6f5; border-color: var(--accent); }
+        button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+        button.primary:hover { background: var(--accent-strong); }
+        input[type="range"] { width: 100%; accent-color: var(--accent); }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px 9px;
+            border: 1px solid var(--line-strong);
+            border-radius: 6px;
+            font-size: 14px;
+            background: #fff;
+            color: var(--text);
+        }
+        input[type="number"] { width: 160px; }
+        .canvas-wrap { overflow-x: auto; }
+        canvas { border: 1px solid var(--line); border-radius: 6px; background: #fbfdff; cursor: crosshair; max-width: 100%; }
+        .log {
+            background: var(--surface-strong);
+            color: #e8e8e8;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 120px;
+            font-family: Consolas, Menlo, monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .joint-panel {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 14px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+        .joint-list {
+            max-height: 380px;
+            overflow: auto;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 8px;
+        }
+        .joint-card {
+            width: 100%;
+            text-align: left;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #fff;
+            cursor: pointer;
+        }
+        .joint-card:hover { background: #f4fbfa; border-color: #8fcac2; }
+        .joint-card.active {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+        .joint-card-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+        .joint-card-meta {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+        .joint-card-detail {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+            color: #333;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+        .joint-card-detail div {
+            min-width: 0;
+            word-break: break-all;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 10px 12px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+        .joint-card-detail b {
+            display: block;
+            margin-bottom: 5px;
+            color: #111;
+            font-size: 13px;
+        }
+        .joint-card.active .joint-card-detail div {
+            border-color: #999;
+            background: #fafafa;
+        }
+        .joint-side-canvas {
+            width: 100%;
+            height: auto;
+            cursor: default;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: #edf2f7;
+            color: #334155;
+            font-size: 12px;
+            margin-right: 4px;
+        }
+
+        .joint-picker-panel {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 14px;
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+        .merged-joint-picker {
+            grid-template-columns: 1fr;
+            margin-top: -4px;
+        }
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+        .physics-panel {
+            grid-template-columns: repeat(3, minmax(280px, 1fr));
+            grid-auto-rows: minmax(206px, auto);
+            align-items: stretch;
+            gap: 16px;
+            padding: 18px;
+            background: var(--surface-soft);
+        }
+        .physics-panel .field {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 14px 16px;
+            height: 100%;
+            overflow: visible;
+        }
+        .physics-panel .field:hover { border-color: #b8cbc8; }
+        .physics-panel label {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .field-kicker {
+            display: inline-flex;
+            align-items: center;
+            min-height: 22px;
+            margin: 0 0 10px;
+            padding: 3px 7px;
+            border-radius: 6px;
+            background: #edf7f5;
+            color: var(--accent-strong);
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .physics-panel input[type="number"],
+        .physics-panel input[type="text"] {
+            width: 100%;
+            height: 40px;
+        }
+        .physics-panel input[type="range"] {
+            margin: 4px 0 8px;
+        }
+        .physics-panel .limit-row {
+            grid-template-columns: 104px minmax(0, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .physics-panel .limit-row .small {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.35;
+        }
+        .physics-panel .box {
+            min-height: 40px;
+            background: #fafafa;
+            line-height: 1.45;
+        }
+        .physics-panel .action-field {
+            grid-column: 1 / -1;
+            height: auto;
+            min-height: 96px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: center;
+            border-color: #9bcfc7;
+            background: #f8fffd;
+        }
+        .physics-panel .checkbox-row {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            margin: 2px 0 0;
+            color: #444;
+        }
+        .physics-panel .actions-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .save-summary {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .visual-panel {
+            display: grid;
+            grid-template-columns: minmax(460px, 1fr) minmax(520px, 1.1fr);
+            gap: 16px;
+            align-items: start;
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+        .visual-card {
+            min-width: 0;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 14px;
+        }
+        .visual-card canvas {
+            width: 100%;
+            height: auto;
+        }
+        #jointSideInfo {
+            word-break: normal;
+            white-space: normal;
+            padding: 0;
+            overflow: hidden;
+        }
+        .side-info-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0;
+            background: #fff;
+        }
+        .side-info-row {
+            display: grid;
+            grid-template-columns: 86px minmax(0, 1fr);
+            gap: 10px;
+            align-items: start;
+            padding: 10px 12px;
+            border-bottom: 1px solid #e6e6e6;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .side-info-row:last-child { border-bottom: none; }
+        .side-info-label {
+            color: #666;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .side-info-value {
+            min-width: 0;
+            color: #111;
+            word-break: break-word;
+        }
+        .side-info-main {
+            font-weight: bold;
+        }
+        .side-info-sub {
+            color: #666;
+            font-size: 12px;
+            margin-top: 2px;
+            word-break: break-word;
+        }
+        .side-info-controls {
+            padding: 12px;
+            display: grid;
+            gap: 12px;
+            background: #fff;
+        }
+        .side-info-control-row {
+            display: grid;
+            grid-template-columns: 150px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+        }
+        .side-info-control-row label {
+            margin: 0;
+            font-size: 13px;
+        }
+        .side-info-control-fields {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+        .side-info-control-fields input[type="number"] {
+            width: 120px;
+        }
+        .side-info-control-fields select {
+            max-width: 260px;
+        }
+        .side-info-control-fields.force-controls {
+            display: grid;
+            grid-template-columns: minmax(90px, 1fr) minmax(180px, 1.45fr);
+            gap: 8px;
+            align-items: center;
+        }
+        .side-info-control-fields.force-controls input[type="number"] {
+            width: 100%;
+            min-width: 0;
+        }
+        .side-info-control-fields.force-controls select {
+            width: 100%;
+            max-width: none;
+            min-width: 0;
+        }
+        .side-info-control-fields.force-controls .force-button-row {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .side-info-control-fields.force-controls button {
+            flex: 1 1 0;
+            white-space: nowrap;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+        .side-toolbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        select {
+            padding: 6px 8px;
+            border: 1px solid var(--line-strong);
+            border-radius: 6px;
+            background: #fff;
+            font-size: 14px;
+        }
+        .live-grid-compact {
+            grid-template-columns: repeat(4, 1fr);
+            padding: 0;
+            background: transparent;
+            margin: 10px 0 12px;
+        }
+        .live-grid-compact .live-box {
+            min-height: 54px;
+            padding: 8px;
+        }
+        .live-grid-compact .live-value {
+            font-size: 18px;
+        }
+        .app-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            background: rgba(0, 0, 0, 0.32);
+        }
+        .app-modal {
+            width: min(1120px, 92vw);
+            max-height: 86vh;
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            background: #fff;
+            border: 1px solid #b8b8b8;
+            border-radius: 8px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+            overflow: hidden;
+            font-size: 21px;
+        }
+        .app-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 18px 22px;
+            border-bottom: 1px solid #e5e5e5;
+            font-weight: bold;
+        }
+        .app-modal-close {
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            font-size: 30px;
+            line-height: 1;
+        }
+        .app-modal-body {
+            padding: 24px 28px;
+            overflow: auto;
+        }
+        .app-modal-body pre {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 21px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .app-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+            padding: 18px 22px;
+            border-top: 1px solid #e5e5e5;
+            background: #f5f5f5;
+        }
+        .app-modal-footer button {
+            min-width: 126px;
+            height: 48px;
+            font-size: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .container { width: min(100% - 24px, 1560px); margin-top: 12px; }
+            .app-hero, .workflow-strip, .hidden-scene-meta, .grid, .grid-3, .grid-4, .joint-panel, .joint-picker-panel, .control-panel, .visual-panel, .live-grid-compact { grid-template-columns: 1fr; }
+            .app-hero { padding: 24px; min-height: 0; }
+            .physics-panel .action-field { grid-template-columns: 1fr; }
+            .physics-panel .actions-row { justify-content: flex-start; }
+            .side-info-row { grid-template-columns: 1fr; gap: 4px; }
+            .side-info-control-row { grid-template-columns: 1fr; gap: 6px; }
+            .joint-card-detail { grid-template-columns: 1fr; }
+        }
+
+        /* The public workbench follows the ArtModeling site's white, square layout. */
+        :root {
+            --page-bg: #fff;
+            --surface-soft: #fafafa;
+            --line: #dedede;
+            --line-strong: #a9a9a9;
+            --text: #171717;
+            --muted: #555;
+            --accent: #171717;
+            --accent-strong: #171717;
+            --accent-soft: #f2f2f2;
+            --shadow: none;
+        }
+        body { background: #fff; font-family: Arial, Helvetica, sans-serif; }
+        .container { width: min(1200px, calc(100% - 36px)); margin: 0 auto 56px; }
+        .solver-nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 62px; margin-bottom: 32px; border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 700; }
+        .solver-nav a { color: var(--text); text-decoration: none; }
+        .solver-nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
+        .solver-nav span { color: var(--muted); }
+        .app-hero { display: block; min-height: 0; padding: 0 0 24px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; box-shadow: none; background: #fff; color: var(--text); }
+        .hero-copy { gap: 0; }
+        .eyebrow { margin-bottom: 10px; color: #666; font-size: 11px; letter-spacing: .12em; }
+        h1 { font-size: clamp(32px, 3.5vw, 46px); letter-spacing: -.035em; }
+        .desc { max-width: 780px; margin: 12px 0 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+        .hero-actions { margin-top: 20px; }
+        .button-link { min-height: 38px; padding: 8px 13px; border: 1px solid #777; border-radius: 0; color: var(--text); }
+        .button-link.primary { border-color: #171717; background: #171717; color: #fff; }
+        .button-link:hover { background: #eee; }
+        .button-link.primary:hover { background: #333; color: #fff; }
+        .hero-panel { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
+        .hero-card { padding: 12px 14px; border: 1px solid var(--line); border-radius: 0; background: #fafafa; }
+        .hero-card-title { margin-bottom: 4px; color: var(--text); font-size: 13px; }
+        .hero-card-text { color: var(--muted); font-size: 12px; line-height: 1.45; }
+        .mode-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 16px 0; padding: 13px 16px; border: 1px solid #c8c8c8; background: #f7f7f7; color: var(--text); font-size: 13px; line-height: 1.5; }
+        .mode-banner[hidden] { display: none; }
+        .mode-banner p { margin: 0; }
+        .mode-banner a { flex: none; display: inline-block; padding: 8px 12px; border: 1px solid #171717; background: #171717; color: #fff; text-decoration: none; font-weight: 700; }
+        .mode-banner a:hover { background: #333; }
+        .workflow-strip { gap: 10px; margin: 18px 0; }
+        .workflow-step { min-height: 0; padding: 12px 13px; border-radius: 0; box-shadow: none; }
+        .workflow-step b { margin-bottom: 4px; font-size: 13px; }
+        .workflow-step span { font-size: 12px; line-height: 1.45; }
+        .section-title { margin-top: 24px; font-size: 18px; }
+        .section-title::before { width: 3px; height: 21px; border-radius: 0; }
+        .metric-card, .grid, .grid-3, .grid-4, .box, .live-box, .hero-card, .joint-picker-panel, .joint-panel, .control-panel, .visual-panel, .visual-card, .joint-card, .app-modal { border-radius: 0; box-shadow: none; }
+        button, input, select { border-radius: 0; }
+        .grid, .grid-3, .grid-4 { background: #fff; }
+        .is-hosted-preview button:disabled, .is-hosted-preview input:disabled, .is-hosted-preview select:disabled { cursor: not-allowed; opacity: .55; }
+        @media (max-width: 900px) {
+            .container { width: min(100% - 24px, 720px); margin-top: 0; }
+            .app-hero { padding: 0 0 22px; }
+            .hero-panel { grid-template-columns: 1fr; }
+            .mode-banner { display: block; }
+            .mode-banner a { margin-top: 10px; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <nav class="solver-nav" aria-label="SolverAdapt navigation">
+        <a href="https://artmodeling-iclr.github.io/artmodeling-iclr/#solveradapt">&larr; Back to ArtModeling</a>
+        <span>SolverAdapt</span>
+    </nav>
+    <header class="app-hero">
+        <div class="hero-copy">
+            <div>
+                <p class="eyebrow">USD Physics Workbench</p>
+                <h1>SolverAdapt</h1>
+                <div class="desc">
+                    Inspect driven joints and transforms in local USD assets, visualize motion direction, limits, and force or torque curves,
+                    then save mass, density, friction, gravity, stiffness, damping, max force, and target position back to the USD file.
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a class="button-link primary" href="#fileStep">Open a USD File</a>
+                <a class="button-link" href="#jointStep">Browse Joints</a>
+                <a class="button-link" href="#visualStep">View Simulation</a>
+            </div>
+        </div>
+        <div class="hero-panel" aria-label="Feature overview">
+            <div class="hero-card">
+                <p class="hero-card-title">Purpose</p>
+                <p class="hero-card-text">Turn USD joint drives and physics attributes into editable controls, side-view motion previews, and reviewed saves.</p>
+            </div>
+            <div class="hero-card">
+                <p class="hero-card-title">Editable properties</p>
+                <p class="hero-card-text">Drive targets, stiffness, damping, maximum force, MassAPI, MaterialAPI, scene gravity, joint axes, and limits.</p>
+            </div>
+            <div class="hero-card">
+                <p class="hero-card-title">Preview scope</p>
+                <p class="hero-card-text">The browser shows a lightweight physics preview. Verify final behavior in Isaac Sim or PhysX.</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="mode-banner" id="hostedModeNotice" role="status" hidden>
+        <p><strong>Online preview.</strong> Loading and saving USD files requires the local Python service. Download the workbench and follow its README to run the full editor on your computer.</p>
+        <a href="solveradapt-local.zip" download>Download local workbench &rarr;</a>
+    </div>
+    <div class="mode-banner" id="localModeNotice" role="status" hidden>
+        <p><strong>Local workbench.</strong> Choose a USD file or enter its path to inspect joints and edit physical properties.</p>
+    </div>
+
+    <div class="workflow-strip" aria-label="Workflow">
+        <div class="workflow-step"><b>1. Load USD</b><span>Choose a local USD, USDA, or USDC file. The Python service reads transforms, joints, drives, and physics materials.</span></div>
+        <div class="workflow-step"><b>2. Select a Joint</b><span>Browse driven joints, axes, limits, target positions, stiffness, and damping.</span></div>
+        <div class="workflow-step"><b>3. Adjust and Preview</b><span>Change physical parameters and inspect the side view, live values, and motion curves.</span></div>
+        <div class="workflow-step"><b>4. Save to USD</b><span>Review the confirmation before saving. The service rereads the USD file to verify changes.</span></div>
+    </div>
+
+    <div class="section-title" id="fileStep">1. USD File</div>
+    <div class="grid">
+        <div class="field">
+            <label>Selected USD path</label>
+            <input id="localUsdPath" type="text" value="" placeholder="Choose a local USD file or enter its path" />
+            <div class="small">Enter a local path or use Choose USD File.</div>
+        </div>
+        <div class="field">
+            <label>File actions</label>
+            <div class="row">
+                <button class="primary" id="openNativeDialog">Choose USD File</button>
+                <button id="setLocalUsdPath">Use Path and Load</button>
+                <button id="loadUsdScene">Reload USD</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title" id="jointStep">2. Joint Selection</div>
+    <div class="hidden-scene-meta">
+        <div class="metric-card">
+            <div class="metric-label">Current USD</div>
+            <div id="usdPath" class="metric-value">Not loaded</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Scene statistics</div>
+            <div id="sceneStats" class="metric-value">Xform: - / Joint: - / Editable Xform: -</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Current joint</div>
+            <div id="progress" class="metric-value">0 / 0</div>
+        </div>
+    </div>
+
+    <div class="joint-picker-panel merged-joint-picker">
+        <div class="field">
+            <label>Driven joints</label>
+            <div id="jointList" class="joint-list">Not loaded</div>
+            <div class="small">Select a joint to inspect its transform, drive settings, and visualization. The active joint is highlighted.</div>
+        </div>
+    </div>
+
+    <div class="section-title" id="paramStep">3. Physics Settings and Save</div>
+    <div class="control-panel physics-panel">
+        <div class="field">
+            <div class="field-kicker">Scene</div>
+            <label>Gravity</label>
+            <input id="gravityNum" type="number" step="0.001" value="9.81" />
+            <div class="limit-row" style="margin-top: 8px;">
+                <span class="small">Direction X</span>
+                <input id="gravityDirXNum" type="number" step="0.001" value="0" />
+            </div>
+            <div class="limit-row">
+                <span class="small">Direction Y</span>
+                <input id="gravityDirYNum" type="number" step="0.001" value="-1" />
+            </div>
+            <div class="limit-row">
+                <span class="small">Direction Z</span>
+                <input id="gravityDirZNum" type="number" step="0.001" value="0" />
+            </div>
+            <div id="gravityInfo" class="small" style="display:none;"></div>
+        </div>
+        <div class="field">
+            <div class="field-kicker">Object</div>
+            <label>Diagonal inertia</label>
+            <div class="limit-row">
+                <span class="small">X</span>
+                <input id="inertiaXNum" type="number" step="0.001" value="" />
+            </div>
+            <div class="limit-row">
+                <span class="small">Y</span>
+                <input id="inertiaYNum" type="number" step="0.001" value="" />
+            </div>
+            <div class="limit-row">
+                <span class="small">Z</span>
+                <input id="inertiaZNum" type="number" step="0.001" value="" />
+            </div>
+            <div id="inertiaInfo" class="small" style="display:none;"></div>
+        </div>
+        <div class="field">
+            <div class="field-kicker">Joint</div>
+            <label>Joint limits</label>
+            <div class="limit-row">
+                <span class="small">Lower limit</span>
+                <input id="lowerLimitNum" type="number" step="0.01" value="-90" />
+            </div>
+            <div class="limit-row">
+                <span class="small">Upper limit</span>
+                <input id="upperLimitNum" type="number" step="0.01" value="0" />
+            </div>
+            <label class="small checkbox-row">
+                <input id="writeLimitCheck" type="checkbox" />
+                Save limit values
+            </label>
+        </div>
+        <div class="field">
+            <div class="field-kicker">Object</div>
+            <label>Mass, density, and volume</label>
+            <div class="limit-row">
+                <span class="small">Mass</span>
+                <input id="massNum" type="number" step="0.001" value="1" />
+            </div>
+            <div class="limit-row">
+                <span class="small">Density</span>
+                <input id="densityNum" type="number" step="0.001" value="" />
+            </div>
+            <div id="bboxVolumeInfo" class="box">-</div>
+            <div id="massInfo" class="small" style="display:none;"></div>
+        </div>
+        <div class="field">
+            <div class="field-kicker">Material</div>
+            <label>Friction</label>
+            <div class="limit-row">
+                <span class="small">Static friction</span>
+                <input id="staticFrictionNum" type="number" step="0.001" value="0" />
+            </div>
+            <div class="limit-row">
+                <span class="small">Dynamic friction</span>
+                <input id="dynamicFrictionNum" type="number" step="0.001" value="0" />
+            </div>
+            <div id="materialInfo" class="small" style="display:none;"></div>
+        </div>
+        <div class="field">
+            <div class="field-kicker">Drive</div>
+            <label><span id="targetLabel">Target position</span>: <span id="targetVal">0</span></label>
+            <input id="targetRange" type="range" min="-180" max="180" step="0.01" value="0" />
+            <input id="targetNum" type="number" step="0.01" value="0" />
+            <div id="targetHelp" class="small">Revolute targets are angles; prismatic targets are displacements. Saving writes DriveAPI.targetPosition.</div>
+        </div>
+        <div class="field">
+            <div class="field-kicker">Drive</div>
+            <label>Maximum force: <span id="maxForceVal">100000</span></label>
+            <input id="maxForceNum" type="number" step="1" value="100000" />
+        </div>
+        <div class="field">
+            <div class="field-kicker">Drive</div>
+            <label>Stiffness: <span id="stiffnessVal">0</span></label>
+            <input id="stiffnessRange" type="range" min="0" max="5000" step="1" value="0" />
+            <input id="stiffnessNum" type="number" step="1" value="0" />
+        </div>
+        <div class="field">
+            <div class="field-kicker">Drive</div>
+            <label>Damping: <span id="dampingVal">0</span></label>
+            <input id="dampingRange" type="range" min="0" max="1000" step="1" value="0" />
+            <input id="dampingNum" type="number" step="1" value="0" />
+        </div>
+        <div class="field action-field">
+            <div>
+                <label>Save changes</label>
+                <p class="save-summary">Saving updates the selected joint and transform in the original USD file. The local service rereads it to verify the result.</p>
+            </div>
+            <div class="actions-row">
+                <button id="prevXform">Previous joint</button>
+                <button id="nextXform">Next joint</button>
+                <button class="primary" id="saveCurrentXform">Save current joint</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title" id="visualStep">4. Side View and Live Simulation</div>
+    <div class="visual-panel">
+        <div class="visual-card">
+            <div class="side-toolbar">
+                <label style="margin: 0;">USD Object Side View</label>
+                <div class="row">
+                    <span class="small" style="margin: 0;">View direction</span>
+                    <select id="sideViewMode">
+                        <option value="auto">Auto / suggested side</option>
+                        <option value="+x">From +X / Y-Z plane</option>
+                        <option value="-x">From -X / Y-Z plane</option>
+                        <option value="+y">From +Y / X-Z plane</option>
+                        <option value="-y">From -Y / X-Z plane</option>
+                        <option value="+z">From +Z / X-Y plane</option>
+                        <option value="-z">From -Z / X-Y plane</option>
+                    </select>
+                </div>
+            </div>
+            <canvas id="jointSideCanvas" class="joint-side-canvas" width="640" height="390"></canvas>
+            <div id="jointSideInfo" class="box" style="margin-top: 8px;">Not loaded</div>
+        </div>
+
+        <div class="visual-card">
+            <label>Joint Motion Preview</label>
+            <div class="canvas-wrap">
+                <canvas id="simCanvas" width="700" height="300"></canvas>
+            </div>
+
+            <div class="grid-4 live-grid-compact">
+                <div class="live-box"><div class="live-title">position</div><div id="livePosition" class="live-value">-</div></div>
+                <div class="live-box"><div class="live-title">targetPosition</div><div id="liveTarget" class="live-value">-</div></div>
+                <div class="live-box"><div class="live-title">velocity</div><div id="liveVelocity" class="live-value">-</div></div>
+                <div class="live-box"><div class="live-title" id="driveEffortTitle">drive effort</div><div id="liveDriveEffort" class="live-value">-</div></div>
+                <div class="live-box"><div class="live-title" id="gravityEffortTitle">gravity effort</div><div id="liveGravityEffort" class="live-value">-</div></div>
+                <div class="live-box"><div class="live-title" id="totalEffortTitle">total effort</div><div id="liveTotalEffort" class="live-value">-</div></div>
+                <div class="live-box"><div class="live-title">acceleration</div><div id="liveAcceleration" class="live-value">-</div></div>
+            </div>
+            <div id="driveHint" class="small" style="margin: 8px 0 0;">-</div>
+
+            <div class="small" style="margin: 10px 0 6px;">Position, target, and velocity</div>
+            <div class="canvas-wrap">
+                <canvas id="chartCanvas" width="700" height="150"></canvas>
+            </div>
+
+            <div class="small" style="margin: 10px 0 6px;">Applied force or torque, total effort, and acceleration</div>
+            <div class="canvas-wrap">
+                <canvas id="effortCanvas" width="700" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">5. Activity Log</div>
+
+    <div id="statusLog" class="log">Waiting for input...</div>
+</div>
+
+<script>
+    const API_BASE = window.location.origin;
+    const IS_LOCAL_WORKBENCH = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname)
+        && /^\/ui\/?$/.test(window.location.pathname);
+    const IS_HOSTED_PREVIEW = !IS_LOCAL_WORKBENCH;
+
+    let sceneData = null;
+    let editableXforms = [];
+    let allDrivableJoints = [];
+    let xformsByPath = new Map();
+    let currentXformIndex = 0;
+    let currentJointIndex = 0;
+    let currentXform = null;
+    let currentJoint = null;
+    let selectedSideViewMode = "auto";
+    let motionDirectionOverrides = {};
+
+    const ui = {
+        usdPath: document.getElementById("usdPath"),
+        sceneStats: document.getElementById("sceneStats"),
+        progress: document.getElementById("progress"),
+        xformName: document.getElementById("xformName"),
+        xformPath: document.getElementById("xformPath"),
+        jointName: document.getElementById("jointName"),
+        jointPath: document.getElementById("jointPath"),
+        jointType: document.getElementById("jointType"),
+        driveName: document.getElementById("driveName"),
+        jointLimit: document.getElementById("jointLimit"),
+        originalTarget: document.getElementById("originalTarget"),
+        originalKpKd: document.getElementById("originalKpKd"),
+        originalMaxForce: document.getElementById("originalMaxForce"),
+        massInfo: document.getElementById("massInfo"),
+        inertiaInfo: document.getElementById("inertiaInfo"),
+        targetLabel: document.getElementById("targetLabel"),
+        targetHelp: document.getElementById("targetHelp"),
+        targetVal: document.getElementById("targetVal"),
+        stiffnessVal: document.getElementById("stiffnessVal"),
+        dampingVal: document.getElementById("dampingVal"),
+        maxForceVal: document.getElementById("maxForceVal"),
+        statusLog: document.getElementById("statusLog"),
+        jointList: document.getElementById("jointList"),
+        jointSideInfo: document.getElementById("jointSideInfo"),
+        sideViewMode: document.getElementById("sideViewMode"),
+        jointMotionOverride: document.getElementById("jointMotionOverride"),
+        livePosition: document.getElementById("livePosition"),
+        liveTarget: document.getElementById("liveTarget"),
+        liveVelocity: document.getElementById("liveVelocity"),
+        liveDriveEffort: document.getElementById("liveDriveEffort"),
+        liveGravityEffort: document.getElementById("liveGravityEffort"),
+        liveTotalEffort: document.getElementById("liveTotalEffort"),
+        liveAcceleration: document.getElementById("liveAcceleration"),
+        driveHint: document.getElementById("driveHint"),
+        driveEffortTitle: document.getElementById("driveEffortTitle"),
+        gravityEffortTitle: document.getElementById("gravityEffortTitle"),
+        totalEffortTitle: document.getElementById("totalEffortTitle"),
+        materialInfo: document.getElementById("materialInfo"),
+        gravityInfo: document.getElementById("gravityInfo"),
+        bboxVolumeInfo: document.getElementById("bboxVolumeInfo"),
+    };
+
+    const inputs = {
+        massNum: document.getElementById("massNum"),
+        inertiaXNum: document.getElementById("inertiaXNum"),
+        inertiaYNum: document.getElementById("inertiaYNum"),
+        inertiaZNum: document.getElementById("inertiaZNum"),
+        staticFrictionNum: document.getElementById("staticFrictionNum"),
+        dynamicFrictionNum: document.getElementById("dynamicFrictionNum"),
+        densityNum: document.getElementById("densityNum"),
+        gravityNum: document.getElementById("gravityNum"),
+        gravityDirXNum: document.getElementById("gravityDirXNum"),
+        gravityDirYNum: document.getElementById("gravityDirYNum"),
+        gravityDirZNum: document.getElementById("gravityDirZNum"),
+        targetRange: document.getElementById("targetRange"),
+        targetNum: document.getElementById("targetNum"),
+        lowerLimitNum: document.getElementById("lowerLimitNum"),
+        upperLimitNum: document.getElementById("upperLimitNum"),
+        writeLimitCheck: document.getElementById("writeLimitCheck"),
+        stiffnessRange: document.getElementById("stiffnessRange"),
+        stiffnessNum: document.getElementById("stiffnessNum"),
+        dampingRange: document.getElementById("dampingRange"),
+        dampingNum: document.getElementById("dampingNum"),
+        maxForceNum: document.getElementById("maxForceNum"),
+        manualForceNum: document.getElementById("manualForceNum"),
+        manualForceDirection: document.getElementById("manualForceDirection")
+    };
+
+    const params = {
+        mass: 1,
+        diagonalInertia: null,
+        staticFriction: 0,
+        dynamicFriction: 0,
+        density: null,
+        gravity: 9.81,
+        gravityDirection: [0, -1, 0],
+        targetPosition: 0,
+        targetVelocity: 0,
+        lowerLimit: null,
+        upperLimit: null,
+        useManualLimit: false,
+        stiffness: 0,
+        damping: 0,
+        maxForce: 100000,
+        manualForce: 100,
+        manualForceDirection: "positive"
+    };
+
+    const sim = {
+        type: "RevoluteJoint",
+        position: 0,
+        velocity: 0,
+        acceleration: 0,
+        driveEffort: 0,
+        gravityEffort: 0,
+        totalEffort: 0,
+        time: 0,
+        mass: 1,
+        lengthMeters: 1,
+        inertia: 1,
+        gravity: 9.81,
+        gravityDirection: [0, -1, 0],
+        damping: 0,
+        staticFriction: 0,
+        dynamicFriction: 0,
+        lowerLimit: null,
+        upperLimit: null,
+        manualForceActive: false,
+        paused: true
+    };
+
+    function log(message) {
+        console.log(message);
+        ui.statusLog.textContent = message;
+    }
+
+    function num(value, fallback = 0) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : fallback;
+    }
+
+    function fmt(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return "-";
+        if (Math.abs(n) >= 100000) return n.toExponential(2);
+        if (Math.abs(n) >= 1000) return n.toFixed(0);
+        if (Math.abs(n) >= 10) return n.toFixed(2);
+        return n.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function fmtMotion(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return "-";
+        if (sim.type !== "RevoluteJoint") return fmt(n);
+        if (Math.abs(n) >= 100000) return n.toExponential(2);
+        return n.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function fmtVec(value) {
+        return `[${v3(value, [0, 0, 0]).map(item => fmt(item)).join(",")}]`;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "-")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function clamp(value, min, max) {
+        if (Number.isFinite(min) && value < min) return min;
+        if (Number.isFinite(max) && value > max) return max;
+        return value;
+    }
+
+    function ensureRangeContains(rangeInput, value) {
+        const v = Number(value);
+        if (!Number.isFinite(v)) return;
+
+        const min = Number(rangeInput.min);
+        const max = Number(rangeInput.max);
+
+        if (v < min) rangeInput.min = String(Math.floor(v));
+        if (v > max) rangeInput.max = String(Math.ceil(Math.abs(v) * 1.2 + 1));
+    }
+
+    function optionalNumFromInput(input) {
+        if (!input || String(input.value).trim() === "") return null;
+        const parsed = Number(input.value);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function setOptionalInput(input, value) {
+        if (!input) return;
+        const parsed = Number(value);
+        input.value = Number.isFinite(parsed) ? String(parsed) : "";
+    }
+
+    function getBboxVolumeFromXform(xform) {
+        const size = Array.isArray(xform?.bbox_size) ? xform.bbox_size : null;
+        if (!size || size.length < 3) return null;
+        const sx = Math.abs(num(size[0], NaN));
+        const sy = Math.abs(num(size[1], NaN));
+        const sz = Math.abs(num(size[2], NaN));
+        if (!Number.isFinite(sx) || !Number.isFinite(sy) || !Number.isFinite(sz)) return null;
+        return sx * sy * sz;
+    }
+
+    function readPhysicalInputs() {
+        params.mass = Math.max(1e-6, num(inputs.massNum.value, 1));
+        params.diagonalInertia = [
+            optionalNumFromInput(inputs.inertiaXNum),
+            optionalNumFromInput(inputs.inertiaYNum),
+            optionalNumFromInput(inputs.inertiaZNum),
+        ];
+        if (params.diagonalInertia.some(value => value === null)) {
+            params.diagonalInertia = null;
+        }
+        params.staticFriction = Math.max(0, num(inputs.staticFrictionNum.value, 0));
+        params.dynamicFriction = Math.max(0, num(inputs.dynamicFrictionNum.value, 0));
+        params.density = optionalNumFromInput(inputs.densityNum);
+        params.gravity = Math.max(0, num(inputs.gravityNum.value, 9.81));
+        params.gravityDirection = [
+            num(inputs.gravityDirXNum.value, 0),
+            num(inputs.gravityDirYNum.value, -1),
+            num(inputs.gravityDirZNum.value, 0),
+        ];
+    }
+
+    function setPhysicalInputsFromCurrent() {
+        const diag = Array.isArray(currentXform?.diagonal_inertia) ? currentXform.diagonal_inertia : [];
+        inputs.massNum.value = Math.max(1e-6, num(currentXform?.mass, 1));
+        setOptionalInput(inputs.inertiaXNum, diag[0]);
+        setOptionalInput(inputs.inertiaYNum, diag[1]);
+        setOptionalInput(inputs.inertiaZNum, diag[2]);
+        inputs.staticFrictionNum.value = Math.max(0, num(currentXform?.static_friction, 0));
+        inputs.dynamicFrictionNum.value = Math.max(0, num(currentXform?.dynamic_friction, 0));
+        setOptionalInput(inputs.densityNum, currentXform?.density);
+        inputs.gravityNum.value = Math.max(0, num(currentXform?.gravity, 9.81));
+
+        const gravityDirection = v3(currentXform?.gravity_direction, [0, -1, 0]);
+        inputs.gravityDirXNum.value = gravityDirection[0];
+        inputs.gravityDirYNum.value = gravityDirection[1];
+        inputs.gravityDirZNum.value = gravityDirection[2];
+        readPhysicalInputs();
+    }
+
+    function getAxisIndex(axis) {
+        const key = String(axis || "").toUpperCase();
+        if (key.endsWith("Y")) return 1;
+        if (key.endsWith("Z")) return 2;
+        return 0;
+    }
+
+    function getUsdInertiaForCurrentJoint() {
+        const diag = Array.isArray(currentXform?.diagonal_inertia) ? currentXform.diagonal_inertia : null;
+        const axisIndex = getAxisIndex(currentJoint?.axis);
+
+        if (diag && diag.length >= 3) {
+            const axisInertia = num(diag[axisIndex], NaN);
+            if (Number.isFinite(axisInertia) && axisInertia > 1e-9) {
+                return axisInertia;
+            }
+        }
+
+        return Math.max(1e-6, num(currentXform?.approx_inertia, 1));
+    }
+
+    function recalcPreviewMassAndInertiaFromUI() {
+        readPhysicalInputs();
+
+        if (currentXform) {
+            sim.mass = Math.max(1e-6, params.mass);
+            sim.lengthMeters = Math.max(1e-6, num(currentXform.approx_length, 1));
+            const axisInertia = params.diagonalInertia
+                ? num(params.diagonalInertia[getAxisIndex(currentJoint?.axis)], NaN)
+                : NaN;
+            sim.inertia = Number.isFinite(axisInertia) && axisInertia > 1e-9
+                ? axisInertia
+                : getUsdInertiaForCurrentJoint();
+            sim.staticFriction = params.staticFriction;
+            sim.dynamicFriction = params.dynamicFriction;
+            sim.damping = Math.max(0, params.damping);
+            sim.gravity = params.gravity;
+            sim.gravityDirection = vNorm(params.gravityDirection, [0, -1, 0]);
+        }
+
+        updateMassInfoBox();
+        updateInertiaInfoBox();
+        updateMaterialInfoBox();
+        updateGravityInfoBox();
+        updateBboxVolumeInfoBox();
+    }
+
+    function syncLabels() {
+        ui.targetVal.textContent = fmt(params.targetPosition);
+        ui.stiffnessVal.textContent = fmt(params.stiffness);
+        ui.dampingVal.textContent = fmt(params.damping);
+        ui.maxForceVal.textContent = fmt(params.maxForce);
+    }
+
+    function getLimitMidpointForJoint(joint) {
+        const lower = Number(joint?.lower_limit);
+        const upper = Number(joint?.upper_limit);
+
+        if (!Number.isFinite(lower) || !Number.isFinite(upper)) {
+            return null;
+        }
+
+        const low = Math.min(lower, upper);
+        const high = Math.max(lower, upper);
+
+        if (high <= low) {
+            return null;
+        }
+
+        return (low + high) / 2;
+    }
+
+    function getInitialTargetPositionForJoint(joint) {
+        return num(joint?.target_position, 0);
+    }
+
+    function getOrderedFiniteLimits() {
+        const lower = Number(sim.lowerLimit);
+        const upper = Number(sim.upperLimit);
+        if (!Number.isFinite(lower) || !Number.isFinite(upper) || upper <= lower) return null;
+        return { lower, upper };
+    }
+
+    function getCurrentLimitCoordinate() {
+        return sim.type === "RevoluteJoint" ? sim.position * 180 / Math.PI : sim.position;
+    }
+
+    function setCurrentLimitCoordinate(value) {
+        const n = num(value, 0);
+        sim.position = sim.type === "RevoluteJoint" ? n * Math.PI / 180 : n;
+    }
+
+    function clampCoordinateToLimits(value) {
+        const limits = getOrderedFiniteLimits();
+        if (!limits) return value;
+        return clamp(value, limits.lower, limits.upper);
+    }
+
+    function syncManualForceDirectionAwayFromCurrentLimit() {
+        const limits = getOrderedFiniteLimits();
+        if (!limits) return;
+
+        const current = getCurrentLimitCoordinate();
+        const span = Math.max(limits.upper - limits.lower, 1e-6);
+        const eps = Math.max(span * 1e-5, 1e-6);
+
+        if (current >= limits.upper - eps) {
+            params.manualForceDirection = "negative";
+        } else if (current <= limits.lower + eps) {
+            params.manualForceDirection = "positive";
+        }
+
+        if (inputs.manualForceDirection) {
+            inputs.manualForceDirection.value = params.manualForceDirection;
+        }
+    }
+
+    function setupTargetRangeForJoint() {
+        const lower = currentJoint?.lower_limit;
+        const upper = currentJoint?.upper_limit;
+
+        if (currentJoint?.type === "PrismaticJoint") {
+            const target = num(currentJoint.target_position, 0);
+
+            if (Number.isFinite(Number(lower)) && Number.isFinite(Number(upper)) && Number(upper) > Number(lower)) {
+                inputs.targetRange.min = String(lower);
+                inputs.targetRange.max = String(upper);
+            } else {
+                const bound = Math.max(2, Math.abs(target) * 1.5);
+                inputs.targetRange.min = String(-bound);
+                inputs.targetRange.max = String(bound);
+            }
+
+            inputs.targetRange.step = "0.001";
+            inputs.targetNum.step = "0.001";
+        } else {
+            if (Number.isFinite(Number(lower)) && Number.isFinite(Number(upper)) && Number(upper) > Number(lower)) {
+                inputs.targetRange.min = String(lower);
+                inputs.targetRange.max = String(upper);
+            } else {
+                inputs.targetRange.min = "-180";
+                inputs.targetRange.max = "180";
+            }
+
+            inputs.targetRange.step = "0.01";
+            inputs.targetNum.step = "0.01";
+        }
+    }
+
+    function setLimitControlsForJoint(joint) {
+        const lower = Number(joint?.lower_limit);
+        const upper = Number(joint?.upper_limit);
+
+        params.lowerLimit = Number.isFinite(lower) ? lower : null;
+        params.upperLimit = Number.isFinite(upper) ? upper : null;
+        params.useManualLimit = false;
+
+        inputs.lowerLimitNum.value = params.lowerLimit === null ? "" : params.lowerLimit;
+        inputs.upperLimitNum.value = params.upperLimit === null ? "" : params.upperLimit;
+        inputs.writeLimitCheck.checked = false;
+    }
+
+    function limitValueDiffersFromUsd(nextValue, usdValue) {
+        const next = Number(nextValue);
+        const usd = Number(usdValue);
+
+        if (!Number.isFinite(next) && !Number.isFinite(usd)) return false;
+        if (!Number.isFinite(next) || !Number.isFinite(usd)) return true;
+
+        return Math.abs(next - usd) > 1e-6;
+    }
+
+    function hasLimitInputChangedFromUsd(lower, upper) {
+        return limitValueDiffersFromUsd(lower, currentJoint?.lower_limit) ||
+            limitValueDiffersFromUsd(upper, currentJoint?.upper_limit);
+    }
+
+    function readLimitControls() {
+        params.lowerLimit = inputs.lowerLimitNum.value === "" ? null : num(inputs.lowerLimitNum.value, null);
+        params.upperLimit = inputs.upperLimitNum.value === "" ? null : num(inputs.upperLimitNum.value, null);
+        params.useManualLimit = Boolean(inputs.writeLimitCheck.checked) ||
+            hasLimitInputChangedFromUsd(params.lowerLimit, params.upperLimit);
+        inputs.writeLimitCheck.checked = params.useManualLimit;
+
+        if (params.useManualLimit) {
+            sim.lowerLimit = params.lowerLimit;
+            sim.upperLimit = params.upperLimit;
+        }
+    }
+
+    function syncTargetToManualLimitDirection() {
+        if (!params.useManualLimit) return;
+
+        const lower = Number(params.lowerLimit);
+        const upper = Number(params.upperLimit);
+        if (!Number.isFinite(lower) || !Number.isFinite(upper) || lower >= upper) return;
+
+        const current = num(params.targetPosition, 0);
+        const eps = 1e-6;
+
+        if (lower >= 0 && current <= lower + eps) {
+            params.targetPosition = upper;
+        } else if (upper <= 0 && current >= upper - eps) {
+            params.targetPosition = lower;
+        } else if (current < lower || current > upper) {
+            params.targetPosition = Math.abs(current - lower) <= Math.abs(current - upper) ? lower : upper;
+        }
+
+        ensureRangeContains(inputs.targetRange, params.targetPosition);
+        inputs.targetRange.value = params.targetPosition;
+        inputs.targetNum.value = params.targetPosition;
+        syncLabels();
+    }
+
+    function setControls(mass, targetPosition, targetVelocity, stiffness, damping, maxForce) {
+        params.mass = Math.max(1e-6, num(mass, 1));
+        params.targetPosition = num(targetPosition, 0);
+        params.targetVelocity = 0;
+        params.stiffness = num(stiffness, 0);
+        params.damping = num(damping, 0);
+        params.maxForce = num(maxForce, 100000);
+
+        inputs.massNum.value = params.mass;
+
+        ensureRangeContains(inputs.targetRange, params.targetPosition);
+        ensureRangeContains(inputs.stiffnessRange, params.stiffness);
+        ensureRangeContains(inputs.dampingRange, params.damping);
+
+        inputs.targetRange.value = params.targetPosition;
+        inputs.targetNum.value = params.targetPosition;
+        inputs.stiffnessRange.value = params.stiffness;
+        inputs.stiffnessNum.value = params.stiffness;
+        inputs.dampingRange.value = params.damping;
+        inputs.dampingNum.value = params.damping;
+        inputs.maxForceNum.value = params.maxForce;
+
+        recalcPreviewMassAndInertiaFromUI();
+        syncLabels();
+    }
+
+    function readControlsFromRange() {
+        params.targetPosition = num(inputs.targetRange.value, 0);
+        params.targetVelocity = 0;
+        readLimitControls();
+        params.stiffness = num(inputs.stiffnessRange.value, 0);
+        params.damping = num(inputs.dampingRange.value, 0);
+        params.maxForce = num(inputs.maxForceNum.value, 100000);
+
+        inputs.targetNum.value = params.targetPosition;
+        inputs.stiffnessNum.value = params.stiffness;
+        inputs.dampingNum.value = params.damping;
+
+        recalcPreviewMassAndInertiaFromUI();
+        syncLabels();
+    }
+
+    function readControlsFromNumber() {
+        readPhysicalInputs();
+        params.targetPosition = num(inputs.targetNum.value, 0);
+        params.targetVelocity = 0;
+        readLimitControls();
+        params.stiffness = num(inputs.stiffnessNum.value, 0);
+        params.damping = num(inputs.dampingNum.value, 0);
+        params.maxForce = num(inputs.maxForceNum.value, 100000);
+
+        ensureRangeContains(inputs.targetRange, params.targetPosition);
+        ensureRangeContains(inputs.stiffnessRange, params.stiffness);
+        ensureRangeContains(inputs.dampingRange, params.damping);
+
+        inputs.targetRange.value = params.targetPosition;
+        inputs.stiffnessRange.value = params.stiffness;
+        inputs.dampingRange.value = params.damping;
+
+        recalcPreviewMassAndInertiaFromUI();
+        syncLabels();
+    }
+
+    inputs.targetRange.addEventListener("input", readControlsFromRange);
+    inputs.stiffnessRange.addEventListener("input", readControlsFromRange);
+    inputs.dampingRange.addEventListener("input", readControlsFromRange);
+    inputs.massNum.addEventListener("change", readControlsFromNumber);
+    inputs.targetNum.addEventListener("change", readControlsFromNumber);
+    inputs.lowerLimitNum.addEventListener("change", () => {
+        readControlsFromNumber();
+        syncTargetToManualLimitDirection();
+    });
+    inputs.upperLimitNum.addEventListener("change", () => {
+        readControlsFromNumber();
+        syncTargetToManualLimitDirection();
+    });
+    inputs.writeLimitCheck.addEventListener("change", () => {
+        readControlsFromNumber();
+        syncTargetToManualLimitDirection();
+    });
+    inputs.stiffnessNum.addEventListener("change", readControlsFromNumber);
+    inputs.dampingNum.addEventListener("change", readControlsFromNumber);
+    inputs.dampingNum.addEventListener("input", readControlsFromNumber);
+    inputs.maxForceNum.addEventListener("change", readControlsFromNumber);
+    [
+        inputs.inertiaXNum,
+        inputs.inertiaYNum,
+        inputs.inertiaZNum,
+        inputs.staticFrictionNum,
+        inputs.dynamicFrictionNum,
+        inputs.densityNum,
+        inputs.gravityNum,
+        inputs.gravityDirXNum,
+        inputs.gravityDirYNum,
+        inputs.gravityDirZNum,
+    ].forEach(input => input.addEventListener("change", readControlsFromNumber));
+    async function openNativeDialog() {
+        if (IS_HOSTED_PREVIEW) return;
+        log("Opening the file chooser...");
+
+        try {
+            const res = await fetch(`${API_BASE}/api/usd/open-dialog`, { method: "POST" });
+            const data = await res.json();
+
+            if (!res.ok) {
+                log("File chooser failed: \n" + JSON.stringify(data, null, 2));
+                alert("Could not open the file chooser. See the activity log.");
+                return;
+            }
+
+            if (data.cancelled) {
+                log("USD file selection was cancelled.");
+                return;
+            }
+
+            document.getElementById("localUsdPath").value = data.active_usd_path || "";
+            ui.usdPath.textContent = data.active_usd_path || "-";
+
+            log("USD file selected.\nCurrent USD: " + data.active_usd_path + "\n\nLoading this USD file...");
+            await loadUsdScene();
+
+        } catch (e) {
+            console.error(e);
+            log("File chooser failed: \n" + e);
+            alert("Could not open the file chooser. Check the local Python service.");
+        }
+    }
+
+    async function setLocalUsdPath() {
+        if (IS_HOSTED_PREVIEW) return;
+        const path = document.getElementById("localUsdPath").value.trim();
+
+        if (!path) {
+            alert("Choose a USD file or enter its local path.");
+            return;
+        }
+
+        log("Changing local USD path: " + path);
+
+        try {
+            const res = await fetch(`${API_BASE}/api/usd/set-path`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ usd_path: path })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                log("Changing USD path failed: \n" + JSON.stringify(data, null, 2));
+                alert("Could not change the USD path. See the activity log.");
+                return;
+            }
+
+            ui.usdPath.textContent = data.active_usd_path || "-";
+            log("USD path updated.\nCurrent USD: " + data.active_usd_path + "\n\nLoading this USD file...");
+            await loadUsdScene();
+
+        } catch (e) {
+            console.error(e);
+            log("Changing USD path failed: \n" + e);
+            alert("Could not change the USD path. Check the local Python service.");
+        }
+    }
+
+    async function loadUsdScene(preferredJointPath = null) {
+        if (IS_HOSTED_PREVIEW) return;
+        if (typeof preferredJointPath !== "string") preferredJointPath = null;
+
+        log("Loading the current USD file...");
+
+        try {
+            const res = await fetch(`${API_BASE}/api/usd/scene`);
+            const data = await res.json();
+
+            if (!res.ok) {
+                log("Loading USD failed: \n" + JSON.stringify(data, null, 2));
+                alert("Could not load the USD file. See the activity log.");
+                return;
+            }
+
+            ui.usdPath.textContent = data.usd_path || "-";
+            ui.sceneStats.textContent =
+                `Xform: ${data.xform_count} / Joint: ${data.joint_count} / Editable Xform: ${data.editable_xform_count}`;
+
+            sceneData = data;
+            editableXforms = data.editable_xforms || [];
+            xformsByPath = new Map((data.xforms || []).map(xform => [xform.path, xform]));
+            allDrivableJoints = (data.joints || []).filter(joint => joint.drivable && joint.controlled_xform_path);
+
+            motionDirectionOverrides = {};
+
+            currentXformIndex = 0;
+            const preferredIndex = preferredJointPath
+                ? allDrivableJoints.findIndex(joint => joint.path === preferredJointPath)
+                : -1;
+            currentJointIndex = preferredIndex >= 0 ? preferredIndex : 0;
+
+            if (allDrivableJoints.length === 0) {
+                currentXform = null;
+                currentJoint = null;
+                ui.progress.textContent = "0 / 0";
+                renderJointList();
+                drawJointSideView();
+                log(
+                    "The USD file loaded, but no driven joints were found.\n" +
+                    `xform_count = ${data.xform_count}\n` +
+                    `joint_count = ${data.joint_count}\n` +
+                    "Check that the USD contains a driven joint linked to an independent transform."
+                );
+                alert("No driven joints were found.");
+                return;
+            }
+
+            showCurrentXform();
+
+            log(
+                "USD file loaded.\n" +
+                `Total transforms: ${data.xform_count}\n` +
+                `Total joints: ${data.joint_count}\n` +
+                `Editable transforms: ${data.editable_xform_count}`
+            );
+
+        } catch (e) {
+            console.error(e);
+            log("Loading USD failed: \n" + e);
+            alert("Could not load the USD file. Check the local Python service.");
+        }
+    }
+
+    function renderJointList() {
+        if (!ui.jointList) return;
+
+        if (!allDrivableJoints.length) {
+            ui.jointList.textContent = "No driven joints";
+            return;
+        }
+
+        ui.jointList.innerHTML = "";
+
+        allDrivableJoints.forEach((joint, index) => {
+            const xform = xformsByPath.get(joint.controlled_xform_path);
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "joint-card" + (index === currentJointIndex ? " active" : "");
+
+            const limitText = `lower=${fmt(joint.lower_limit)} / upper=${fmt(joint.upper_limit)}`;
+            const limitSource = joint.limit_source ? `source=${joint.limit_source}` : "source=-";
+
+            item.innerHTML = `
+                <div class="joint-card-title">${index + 1}. ${escapeHtml(joint.name || "-")}</div>
+                <div class="joint-card-meta">
+                    <span class="badge">${escapeHtml(joint.type || "-")}</span>
+                    <span class="badge">axis=${escapeHtml(joint.axis || "-")}</span>
+                    <span class="badge">drive=${escapeHtml(joint.drive_name || "-")}</span><br/>
+                    Xform: ${escapeHtml(xform?.name || joint.controlled_xform_path || "-")}<br/>
+                    ${escapeHtml(joint.path || "-")}
+                </div>
+                <div class="joint-card-detail">
+                    <div><b>limit</b><br/>${escapeHtml(limitText)}<br/>${escapeHtml(limitSource)}</div>
+                    <div><b>targetPosition</b><br/>${escapeHtml(fmt(joint.target_position))}</div>
+                    <div><b>stiffness / damping</b><br/>${escapeHtml(fmt(joint.stiffness))} / ${escapeHtml(fmt(joint.damping))}</div>
+                    <div><b>maxForce</b><br/>${escapeHtml(fmt(joint.max_force))}</div>
+                </div>
+            `;
+            item.addEventListener("click", () => {
+                currentJointIndex = index;
+                showCurrentXform();
+            });
+            ui.jointList.appendChild(item);
+        });
+    }
+
+    function findXformForJoint(joint) {
+        if (!joint) return null;
+        const direct = xformsByPath.get(joint.controlled_xform_path);
+        if (direct) return direct;
+
+        return editableXforms.find(xform => xform.path === joint.controlled_xform_path) || null;
+    }
+
+    function getCurrentJointFromXform(xform) {
+        const drivable = xform.drivable_joints || [];
+        if (drivable.length > 0) return drivable[0];
+
+        const related = xform.related_joints || [];
+        return related[0] || null;
+    }
+
+    function resetSimStateForCurrent() {
+        sim.type = currentJoint?.type || "RevoluteJoint";
+        sim.mass = Math.max(1e-6, num(currentXform?.mass, 1));
+        sim.lengthMeters = Math.max(1e-6, num(currentXform?.approx_length, 1));
+        sim.inertia = getUsdInertiaForCurrentJoint();
+        sim.gravity = num(currentXform?.gravity, 9.81);
+        sim.gravityDirection = vNorm(v3(currentXform?.gravity_direction, [0, -1, 0]), [0, -1, 0]);
+        sim.damping = Math.max(0, num(currentJoint?.damping, 0));
+        sim.staticFriction = Math.max(0, num(currentXform?.static_friction, 0));
+        sim.dynamicFriction = Math.max(0, num(currentXform?.dynamic_friction, 0));
+        sim.lowerLimit = currentJoint?.lower_limit === null || currentJoint?.lower_limit === undefined ? null : Number(currentJoint.lower_limit);
+        sim.upperLimit = currentJoint?.upper_limit === null || currentJoint?.upper_limit === undefined ? null : Number(currentJoint.upper_limit);
+        sim.manualForceActive = false;
+        sim.paused = true;
+
+        const initialTargetPosition = getInitialTargetPositionForJoint(currentJoint);
+
+        if (sim.type === "RevoluteJoint") {
+            setCurrentLimitCoordinate(clampCoordinateToLimits(initialTargetPosition));
+            sim.velocity = 0;
+        } else {
+            sim.position = clampCoordinateToLimits(initialTargetPosition);
+            sim.velocity = 0;
+        }
+
+        syncManualForceDirectionAwayFromCurrentLimit();
+
+        sim.acceleration = 0;
+        sim.driveEffort = 0;
+        sim.gravityEffort = 0;
+        sim.totalEffort = 0;
+        sim.time = 0;
+
+        positionHistory.length = 0;
+        targetHistory.length = 0;
+        velocityHistory.length = 0;
+        driveEffortHistory.length = 0;
+        totalEffortHistory.length = 0;
+        accelerationHistory.length = 0;
+    }
+
+    function updateMassInfoBox() {
+        ui.massInfo.textContent = "";
+    }
+
+    function updateInertiaInfoBox() {
+        ui.inertiaInfo.textContent = "";
+    }
+
+    function updateMaterialInfoBox() {
+        ui.materialInfo.textContent = "";
+    }
+
+    function updateGravityInfoBox() {
+        ui.gravityInfo.textContent = "";
+    }
+
+    function updateBboxVolumeInfoBox() {
+        const volume = Number.isFinite(Number(currentXform?.bbox_volume))
+            ? Number(currentXform.bbox_volume)
+            : getBboxVolumeFromXform(currentXform);
+        ui.bboxVolumeInfo.textContent = `volume = ${volume === null ? "-" : fmt(volume)}`;
+    }
+
+    function showCurrentXform() {
+        currentJoint = allDrivableJoints[currentJointIndex] || null;
+        currentXform = findXformForJoint(currentJoint);
+        currentXformIndex = currentXform ? editableXforms.findIndex(xform => xform.path === currentXform.path) : -1;
+
+        renderJointList();
+
+        if (!currentJoint || !currentXform) {
+            log("No joint or transform is available to display.");
+            drawJointSideView();
+            return;
+        }
+
+        ui.progress.textContent = `${currentJointIndex + 1} / ${allDrivableJoints.length}`;
+
+        if (currentJoint.type === "PrismaticJoint") {
+            ui.targetLabel.textContent = "Target position";
+            ui.targetHelp.textContent = "Prismatic joints use displacement targets. The slider follows USD lower and upper limits when available.";
+            ui.driveEffortTitle.textContent = "applied force";
+            ui.gravityEffortTitle.textContent = "gravity force";
+            ui.totalEffortTitle.textContent = "total force";
+        } else {
+            ui.targetLabel.textContent = "Target angle";
+            ui.targetHelp.textContent = "Revolute joints use angular targets. Saving motion direction also updates the axis and signed target and limits.";
+            ui.driveEffortTitle.textContent = "applied torque";
+            ui.gravityEffortTitle.textContent = "gravity torque";
+            ui.totalEffortTitle.textContent = "total torque";
+        }
+
+        setupTargetRangeForJoint();
+        setLimitControlsForJoint(currentJoint);
+        setPhysicalInputsFromCurrent();
+
+        const initialTargetPosition = getInitialTargetPositionForJoint(currentJoint);
+
+        setControls(
+            currentXform.mass,
+            initialTargetPosition,
+            0,
+            currentJoint.stiffness,
+            currentJoint.damping,
+            currentJoint.max_force
+        );
+
+        resetSimStateForCurrent();
+        recalcPreviewMassAndInertiaFromUI();
+        syncMotionOverrideControl();
+        drawJointSideView();
+
+        log(
+            `Current joint: ${currentJoint.path}
+` +
+            `Controlled transform: ${currentXform.path}
+` +
+            `Joint type: ${currentJoint.type}
+` +
+            `Drive: ${currentJoint.drive_name}
+` +
+            `side_view = ${currentJoint.preview_view?.mode || "-"}
+` +
+            `focus_path = ${currentJoint.preview_view?.focus_path || "-"}
+` +
+            `mass = ${currentXform.mass}
+` +
+            `approx_length = ${currentXform.approx_length}
+` +
+            `approx_inertia = ${currentXform.approx_inertia}
+` +
+            `axis = ${currentJoint.axis || "-"}
+` +
+            `motionDirection = ${currentJoint.motion_direction || "auto"}
+` +
+            `limit = [${currentJoint.lower_limit}, ${currentJoint.upper_limit}]
+` +
+            `targetPosition = ${initialTargetPosition}`
+        );
+    }
+
+    function prevXform() {
+        if (allDrivableJoints.length === 0) {
+            alert("Load a USD file first.");
+            return;
+        }
+        if (currentJointIndex > 0) {
+            currentJointIndex--;
+            showCurrentXform();
+        } else {
+            alert("This is the first joint.");
+        }
+    }
+
+    function nextXform() {
+        if (allDrivableJoints.length === 0) {
+            alert("Load a USD file first.");
+            return;
+        }
+        if (currentJointIndex < allDrivableJoints.length - 1) {
+            currentJointIndex++;
+            showCurrentXform();
+        } else {
+            alert("This is the last joint.");
+        }
+    }
+
+    function showConfirmModal(message, title = "Confirm Save") {
+        return new Promise(resolve => {
+            document.querySelectorAll(".app-modal-overlay").forEach(node => node.remove());
+
+            const overlay = document.createElement("div");
+            overlay.className = "app-modal-overlay";
+            overlay.innerHTML = `
+                <div class="app-modal" role="dialog" aria-modal="true" aria-labelledby="saveConfirmTitle">
+                    <div class="app-modal-header">
+                        <div id="saveConfirmTitle">${escapeHtml(title)}</div>
+                        <button class="app-modal-close" type="button" aria-label="Close">×</button>
+                    </div>
+                    <div class="app-modal-body">
+                        <pre></pre>
+                    </div>
+                    <div class="app-modal-footer">
+                        <button class="primary app-modal-ok" type="button">Confirm</button>
+                        <button class="app-modal-cancel" type="button">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            const close = value => {
+                document.removeEventListener("keydown", onKeyDown);
+                overlay.remove();
+                resolve(value);
+            };
+            const onKeyDown = event => {
+                if (event.key === "Escape") close(false);
+            };
+
+            overlay.querySelector("pre").textContent = message;
+            overlay.querySelector(".app-modal-ok").addEventListener("click", () => close(true));
+            overlay.querySelector(".app-modal-cancel").addEventListener("click", () => close(false));
+            overlay.querySelector(".app-modal-close").addEventListener("click", () => close(false));
+            overlay.addEventListener("click", event => {
+                if (event.target === overlay) close(false);
+            });
+
+            document.addEventListener("keydown", onKeyDown);
+            document.body.appendChild(overlay);
+            overlay.querySelector(".app-modal-ok").focus();
+        });
+    }
+
+    async function saveCurrentXform() {
+        if (IS_HOSTED_PREVIEW) return;
+        readControlsFromNumber();
+        syncTargetToManualLimitDirection();
+
+        if (!currentXform || !currentJoint) {
+            alert("No transform is ready to save. Load a USD file first.");
+            return;
+        }
+
+        const confirmMessage =
+            "Write the current parameters to the original USD file?\n\n" +
+            "File: " + ui.usdPath.textContent + "\n\n" +
+            "Transform: " + currentXform.path + "\n" +
+            "Joint: " + currentJoint.path + "\n\n" +
+            "mass = " + params.mass + "\n" +
+            "diagonalInertia = " + JSON.stringify(params.diagonalInertia) + "\n" +
+            "staticFriction = " + params.staticFriction + "\n" +
+            "dynamicFriction = " + params.dynamicFriction + "\n" +
+            "density = " + params.density + "\n" +
+            "gravity = " + params.gravity + "\n" +
+            "gravityDirection = " + JSON.stringify(params.gravityDirection) + "\n" +
+            "stiffness = " + params.stiffness + "\n" +
+            "damping = " + params.damping + "\n" +
+            "targetPosition = " + params.targetPosition + "\n" +
+            "writeLimit = " + params.useManualLimit + "\n" +
+            "lowerLimit = " + params.lowerLimit + "\n" +
+            "upperLimit = " + params.upperLimit + "\n" +
+            "maxForce = " + params.maxForce + "\n" +
+            "motionDirection = " + getCurrentMotionOverrideKey() + "\n\n" +
+            "The local service writes the selected direction to the actual USD axis and signed target position and limits.";
+
+        const ok = await showConfirmModal(confirmMessage);
+
+        if (!ok) {
+            log("Save cancelled.");
+            return;
+        }
+
+        const payload = {
+            xform_path: currentXform.path,
+            joint_path: currentJoint.path,
+            drive_name: currentJoint.drive_name,
+            target_position: params.targetPosition,
+            target_velocity: 0,
+            stiffness: params.stiffness,
+            damping: params.damping,
+            max_force: params.maxForce,
+            mass: params.mass,
+            diagonal_inertia: params.diagonalInertia,
+            static_friction: params.staticFriction,
+            dynamic_friction: params.dynamicFriction,
+            density: params.density,
+            gravity: params.gravity,
+            gravity_direction: params.gravityDirection,
+            motion_direction: getCurrentMotionOverrideKey(),
+            use_manual_limit: params.useManualLimit,
+            lower_limit: params.lowerLimit,
+            upper_limit: params.upperLimit
+        };
+
+        log("Writing physics properties and the joint drive: \n" + JSON.stringify(payload, null, 2));
+
+        try {
+            const res = await fetch(`${API_BASE}/api/usd/xform-drive`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                log("Save failed: \n" + JSON.stringify(data, null, 2));
+                alert("Save failed. See the activity log.");
+                return;
+            }
+
+            const savedJointPath = currentJoint.path;
+
+            log(
+                "Saved and verified in the original USD file.\n" +
+                `File: ${data.saved_usd}\n` +
+                `Xform: ${data.xform_path}\n` +
+                `Joint: ${data.joint_path}\n` +
+                `mass = ${data.mass}\n` +
+                `diagonal_inertia = ${JSON.stringify(data.diagonal_inertia || null)}\n` +
+                `static_friction = ${data.static_friction ?? "-"}\n` +
+                `dynamic_friction = ${data.dynamic_friction ?? "-"}\n` +
+                `density = ${data.density ?? "-"}\n` +
+                `gravity = ${data.gravity ?? "-"}\n` +
+                `gravity_direction = ${JSON.stringify(data.gravity_direction || null)}\n` +
+                `gravity_scene_path = ${data.gravity_scene_path || "-"}\n` +
+                `gravity_scene_paths = ${JSON.stringify(data.gravity_scene_paths || [])}\n` +
+                `gravity_written_attrs = ${JSON.stringify(data.gravity_written_attrs || [])}\n` +
+                `verified_gravity = ${data.verified_gravity ?? "-"}\n` +
+                `verified_gravity_direction = ${JSON.stringify(data.verified_gravity_direction || null)}\n` +
+                `verified_gravity_source = ${data.verified_gravity_source || "-"}\n` +
+                `verified_gravity_scenes = ${JSON.stringify(data.verified_gravity_scenes || [])}\n` +
+                `stiffness = ${data.stiffness}\n` +
+                `damping = ${data.damping}\n` +
+                `target_position = ${data.target_position}\n` +
+                `target_velocity = 0\n` +
+                `axis = ${data.axis || "-"}\n` +
+                `axis_world_vector = ${JSON.stringify(data.axis_world_vector || null)}\n` +
+                `use_manual_limit = ${data.use_manual_limit}\n` +
+                `limit = [${data.lower_limit ?? "-"}, ${data.upper_limit ?? "-"}]\n` +
+                `written_limit_attrs = ${JSON.stringify(data.written_limit_attrs || [])}\n` +
+                `verified_limit = [${data.verified_lower_limit ?? "-"}, ${data.verified_upper_limit ?? "-"}]\n` +
+                `verified_limit_source = ${data.verified_limit_source || "-"}\n` +
+                `verified_limit_attrs = ${JSON.stringify(data.verified_limit_attrs || [])}\n` +
+                `target_outside_limit = ${data.target_outside_limit}\n` +
+                `motion_direction = ${data.motion_direction || "auto"}\n\n` +
+                "Reloading the USD file..."
+            );
+
+            await loadUsdScene(savedJointPath);
+
+        } catch (e) {
+            console.error(e);
+            log("Save failed: \n" + e);
+            alert("Save failed. Check the local Python service log.");
+        }
+    }
+
+    document.getElementById("openNativeDialog").addEventListener("click", openNativeDialog);
+    document.getElementById("setLocalUsdPath").addEventListener("click", setLocalUsdPath);
+    document.getElementById("loadUsdScene").addEventListener("click", () => loadUsdScene());
+    document.getElementById("prevXform").addEventListener("click", prevXform);
+    document.getElementById("nextXform").addEventListener("click", nextXform);
+    document.getElementById("saveCurrentXform").addEventListener("click", saveCurrentXform);
+    if (ui.sideViewMode) {
+        ui.sideViewMode.addEventListener("change", () => {
+            selectedSideViewMode = ui.sideViewMode.value || "auto";
+            drawJointSideView();
+        });
+    }
+
+    const canvas = document.getElementById("simCanvas");
+    const ctx = canvas.getContext("2d");
+    const jointSideCanvas = document.getElementById("jointSideCanvas");
+    const jointSideCtx = jointSideCanvas.getContext("2d");
+    const chartCanvas = document.getElementById("chartCanvas");
+    const chartCtx = chartCanvas.getContext("2d");
+    const effortCanvas = document.getElementById("effortCanvas");
+    const effortCtx = effortCanvas.getContext("2d");
+
+    const historyLength = 260;
+    const CALCULATE_PREVIEW_LINEAR_SPEED = 0.01;
+    const CALCULATE_PREVIEW_ANGULAR_SPEED_DEG = 1.0;
+    const positionHistory = [];
+    const targetHistory = [];
+    const velocityHistory = [];
+    const driveEffortHistory = [];
+    const totalEffortHistory = [];
+    const accelerationHistory = [];
+    let interactionHint = "";
+    let interactionHintExpireAt = 0;
+    let jointSideInfoRenderKey = "";
+
+    function setInteractionHint(message, durationMs = 1800) {
+        interactionHint = message;
+        interactionHintExpireAt = Date.now() + durationMs;
+    }
+
+    function pushHistory(latest) {
+        if (positionHistory.length >= historyLength) {
+            positionHistory.shift();
+            targetHistory.shift();
+            velocityHistory.shift();
+            driveEffortHistory.shift();
+            totalEffortHistory.shift();
+            accelerationHistory.shift();
+        }
+        positionHistory.push(latest.current);
+        targetHistory.push(latest.target);
+        velocityHistory.push(latest.velocity);
+        driveEffortHistory.push(latest.driveEffort);
+        totalEffortHistory.push(latest.totalEffort);
+        accelerationHistory.push(latest.acceleration);
+    }
+
+    function updateLiveValues(latest) {
+        ui.livePosition.textContent = fmtMotion(latest.current);
+        ui.liveTarget.textContent = fmt(latest.target);
+        ui.liveVelocity.textContent = fmtMotion(latest.velocity);
+        ui.liveDriveEffort.textContent = fmt(latest.driveEffort);
+        ui.liveGravityEffort.textContent = fmt(latest.gravityEffort);
+        ui.liveTotalEffort.textContent = fmt(latest.totalEffort);
+        ui.liveAcceleration.textContent = fmtMotion(latest.acceleration);
+
+        if (interactionHint && Date.now() < interactionHintExpireAt) {
+            ui.driveHint.textContent = interactionHint;
+            return;
+        }
+
+        if (sim.manualForceActive) {
+            ui.driveHint.textContent = "Constant force is being applied in the selected direction. Force, mass or inertia, and limits determine the motion.";
+        } else if (sim.paused) {
+            ui.driveHint.textContent = "Motion is paused at the current position. Select Start to apply force again.";
+        } else {
+            ui.driveHint.textContent = "Select Start to apply constant force, or Stop to end it.";
+        }
+    }
+
+    function getManualForceSign() {
+        return params.manualForceDirection === "negative" ? -1 : 1;
+    }
+
+    function getManualEffort() {
+        if (!sim.manualForceActive) return 0;
+        return getManualForceSign() * Math.max(0, num(params.manualForce, 0));
+    }
+
+    function signForResistance(velocity, effort) {
+        if (Math.abs(velocity) > 1e-6) return Math.sign(velocity);
+        if (Math.abs(effort) > 1e-9) return Math.sign(effort);
+        return 0;
+    }
+
+    function computeFrictionEffort(appliedEffort, velocity, normalEffort, leverArm = 1) {
+        const normal = Math.max(0, Math.abs(normalEffort));
+        const staticLimit = Math.max(0, sim.staticFriction) * normal * leverArm;
+        const dynamicLimit = Math.max(0, sim.dynamicFriction) * normal * leverArm;
+
+        if (normal <= 1e-9 || (staticLimit <= 1e-9 && dynamicLimit <= 1e-9)) {
+            return { effort: 0, locked: false };
+        }
+
+        if (Math.abs(velocity) <= 1e-5 && Math.abs(appliedEffort) <= staticLimit) {
+            return { effort: -appliedEffort, locked: true };
+        }
+
+        const sign = signForResistance(velocity, appliedEffort);
+        return { effort: sign === 0 ? 0 : -sign * dynamicLimit, locked: false };
+    }
+
+    function getPositiveMotionVector() {
+        return vNorm(
+            v3(currentJoint?.preview_view?.motion_vector, currentJoint?.preview_view?.axis_vector || [1, 0, 0]),
+            [1, 0, 0]
+        );
+    }
+
+    function getManualSelectedMotionVector() {
+        return getPrismaticSignedMotionVector(getManualForceSign());
+    }
+
+    function getPrismaticAxisMotionVector() {
+        return vNorm(
+            v3(currentJoint?.preview_view?.axis_vector, currentJoint?.preview_view?.motion_vector || [1, 0, 0]),
+            [1, 0, 0]
+        );
+    }
+
+    function getPrismaticSignedMotionVector(sign = getManualForceSign()) {
+        return vMul(getPrismaticAxisMotionVector(), sign);
+    }
+
+    function getPrismaticCoordinatePositiveMotionVector() {
+        return getPrismaticAxisMotionVector();
+    }
+
+    function getPrismaticGravityForce() {
+        return getPrismaticForceTerms().gravityParallel;
+    }
+
+    function getPrismaticForceTerms(velocity = sim.velocity) {
+        const gravityDir = vNorm(sim.gravityDirection, [0, -1, 0]);
+        const axisMotion = getPrismaticAxisMotionVector();
+        const selectedMotion = getPrismaticSignedMotionVector(getManualForceSign());
+        const gravityMotionDot = clamp(vDot(gravityDir, axisMotion), -1, 1);
+        const selectedGravityMotionDot = clamp(vDot(gravityDir, selectedMotion), -1, 1);
+        const weight = Math.max(0, sim.mass * sim.gravity);
+        const dampingForce = -sim.damping * velocity;
+        const normalForce = weight * Math.sqrt(Math.max(0, 1 - gravityMotionDot * gravityMotionDot));
+
+        return {
+            axisMotion,
+            selectedMotion,
+            gravityMotionDot,
+            selectedGravityMotionDot,
+            gravityParallel: weight * gravityMotionDot,
+            selectedGravityParallel: weight * selectedGravityMotionDot,
+            normalForce,
+            dampingForce,
+            selectedDampingForce: getManualForceSign() * dampingForce,
+        };
+    }
+
+    function getPrismaticManualForceTerms(velocity = sim.velocity) {
+        const terms = getPrismaticForceTerms(velocity);
+        const selectedGravityMotionDot = terms.selectedGravityMotionDot;
+        const angleDegrees = Math.acos(clamp(selectedGravityMotionDot, -1, 1)) * 180 / Math.PI;
+
+        return {
+            selectedMotion: terms.selectedMotion,
+            selectedGravityMotionDot,
+            selectedGravityParallel: terms.selectedGravityParallel,
+            normalForce: terms.normalForce,
+            selectedDampingForce: terms.selectedDampingForce,
+            angleDegrees,
+            gravityRelation: selectedGravityMotionDot > 1e-9
+                ? "assist"
+                : selectedGravityMotionDot < -1e-9
+                    ? "resist"
+                    : "perpendicular",
+        };
+    }
+
+    function getRevoluteForceTerms(velocity = sim.velocity, angleRad = sim.position) {
+        const axis = getEffectiveAxisVector(currentJoint, currentJoint?.preview_view?.axis_vector);
+        const jointCenter = v3(currentJoint?.preview_view?.joint_center, v3(currentXform?.bbox_center, [0, 0, 0]));
+        const baseCenter = v3(currentXform?.bbox_center, jointCenter);
+        const usdAngle = num(currentJoint?.target_position, 0) * Math.PI / 180;
+        const currentCenter = rotatePointAroundAxis(baseCenter, jointCenter, axis, angleRad - usdAngle);
+        const radius = vSub(currentCenter, jointCenter);
+        const force = vMul(vNorm(sim.gravityDirection, [0, 0, -1]), Math.max(0, sim.mass * sim.gravity));
+        const gravityTorque = vDot(vCross(radius, force), axis);
+        const dampingTorque = -sim.damping * velocity;
+        const leverArm = Math.max(1e-6, vLen(vCross(radius, axis)), sim.lengthMeters / 2);
+        const normalForce = Math.max(0, sim.mass * sim.gravity);
+        const selectedGravityTorque = getManualForceSign() * gravityTorque;
+
+        return {
+            axis,
+            selectedMotion: vMul(axis, getManualForceSign()),
+            radius,
+            leverArm,
+            gravityTorque,
+            selectedGravityTorque,
+            dampingTorque,
+            selectedDampingTorque: getManualForceSign() * dampingTorque,
+            normalForce,
+            gravityRelation: selectedGravityTorque > 1e-9
+                ? "assist"
+                : selectedGravityTorque < -1e-9
+                    ? "resist"
+                    : "perpendicular",
+        };
+    }
+
+    function getManualLimitState() {
+        const sign = getManualForceSign();
+        const eps = 1e-6;
+
+        if (sim.type === "RevoluteJoint") {
+            const current = sim.position * 180 / Math.PI;
+            const atLower = Number.isFinite(sim.lowerLimit) && current <= sim.lowerLimit + eps;
+            const atUpper = Number.isFinite(sim.upperLimit) && current >= sim.upperLimit - eps;
+
+            if ((sign < 0 && atLower) || (sign > 0 && atUpper)) return "blocked_by_limit";
+            if ((sign > 0 && atLower) || (sign < 0 && atUpper)) return "release_from_limit";
+            return "free";
+        }
+
+        const atLower = Number.isFinite(sim.lowerLimit) && sim.position <= sim.lowerLimit + eps;
+        const atUpper = Number.isFinite(sim.upperLimit) && sim.position >= sim.upperLimit - eps;
+
+        if ((sign < 0 && atLower) || (sign > 0 && atUpper)) return "blocked_by_limit";
+        if ((sign > 0 && atLower) || (sign < 0 && atUpper)) return "release_from_limit";
+        return "free";
+    }
+
+    function getMinimumManualEffortBreakdown(options = {}) {
+        const sign = getManualForceSign();
+        const previewVelocity = sim.type === "RevoluteJoint"
+            ? sign * CALCULATE_PREVIEW_ANGULAR_SPEED_DEG * Math.PI / 180
+            : sign * CALCULATE_PREVIEW_LINEAR_SPEED;
+        const velocity = options.staticStart ? previewVelocity : sim.velocity;
+        const limitState = getManualLimitState();
+        let passiveEffort = 0;
+        let staticLimit = 0;
+        let dynamicLimit = 0;
+        let gravityParallel = null;
+        let normalForce = null;
+        let dampingEffort = null;
+        let gravityMotionDot = null;
+        let gravityAngleDegrees = null;
+        let gravityRelation = null;
+        let selectedMotion = null;
+        let velocityForCalculate = velocity;
+
+        if (sim.type === "RevoluteJoint") {
+            let angleForTerms = sim.position;
+            if (options.staticStart && limitState === "release_from_limit") {
+                const limits = getOrderedFiniteLimits();
+                if (limits) {
+                    const current = getCurrentLimitCoordinate();
+                    const probeStep = Math.max((limits.upper - limits.lower) * 0.02, 0.5);
+                    angleForTerms = clamp(current + sign * probeStep, limits.lower, limits.upper) * Math.PI / 180;
+                }
+            }
+            const terms = getRevoluteForceTerms(velocity, angleForTerms);
+            gravityParallel = terms.selectedGravityTorque;
+            normalForce = terms.normalForce;
+            dampingEffort = terms.selectedDampingTorque;
+            gravityRelation = terms.gravityRelation;
+            selectedMotion = terms.selectedMotion;
+            passiveEffort = terms.selectedGravityTorque + terms.selectedDampingTorque;
+            staticLimit = Math.max(0, sim.staticFriction) * terms.normalForce * terms.leverArm;
+            dynamicLimit = Math.max(0, sim.dynamicFriction) * terms.normalForce * terms.leverArm;
+        } else {
+            const terms = getPrismaticManualForceTerms(velocity);
+            gravityParallel = terms.selectedGravityParallel;
+            normalForce = terms.normalForce;
+            dampingEffort = terms.selectedDampingForce;
+            gravityMotionDot = terms.selectedGravityMotionDot;
+            gravityAngleDegrees = terms.angleDegrees;
+            gravityRelation = terms.gravityRelation;
+            selectedMotion = terms.selectedMotion;
+            passiveEffort = terms.selectedGravityParallel + terms.selectedDampingForce;
+            staticLimit = Math.max(0, sim.staticFriction) * terms.normalForce;
+            dynamicLimit = Math.max(0, sim.dynamicFriction) * terms.normalForce;
+        }
+
+        const frictionLimit = Math.max(staticLimit, dynamicLimit);
+        const breakawayThreshold = staticLimit - passiveEffort;
+        const slidingThreshold = dynamicLimit - passiveEffort;
+        const threshold = limitState === "blocked_by_limit"
+            ? Infinity
+            : Math.max(0, frictionLimit - passiveEffort);
+        const effortMargin = 0.01;
+        const minimumForce = threshold <= 1e-9 ? 0 : threshold + effortMargin;
+
+        return {
+            sign,
+            limitState,
+            passiveEffort,
+            gravityParallel,
+            normalForce,
+            dampingEffort,
+            gravityMotionDot,
+            gravityAngleDegrees,
+            gravityRelation,
+            selectedMotion,
+            velocityForCalculate,
+            staticLimit,
+            dynamicLimit,
+            frictionLimit,
+            breakawayThreshold,
+            slidingThreshold,
+            threshold,
+            minimumForce,
+        };
+    }
+
+    function shouldHoldAtRestForManualDirection(appliedEffort) {
+        if (!sim.manualForceActive || Math.abs(sim.velocity) > 1e-5) return false;
+
+        const breakdown = getMinimumManualEffortBreakdown({ staticStart: true });
+        if (breakdown.limitState === "blocked_by_limit") return true;
+
+        const manualMagnitude = Math.abs(appliedEffort);
+        return breakdown.threshold > 1e-9 && manualMagnitude <= breakdown.threshold + 1e-9;
+    }
+
+    function simStepRevolute(dt) {
+        let appliedTorque = getManualEffort();
+        const terms = getRevoluteForceTerms();
+        const dampingTorque = -sim.damping * sim.velocity;
+        const leverArm = terms.leverArm;
+        const gravityTorque = terms.gravityTorque;
+
+        if (shouldHoldAtRestForManualDirection(appliedTorque)) {
+            sim.velocity = 0;
+            sim.acceleration = 0;
+            sim.driveEffort = appliedTorque;
+            sim.gravityEffort = gravityTorque;
+            sim.totalEffort = 0;
+
+            return {
+                current: sim.position * 180 / Math.PI,
+                target: params.targetPosition,
+                velocity: 0,
+                driveEffort: appliedTorque,
+                gravityEffort: gravityTorque,
+                totalEffort: 0,
+                acceleration: 0
+            };
+        }
+
+        const lowSpeedRelease = sim.manualForceActive && Math.abs(sim.velocity) <= 1e-3;
+        const releaseBreakdown = lowSpeedRelease
+            ? getMinimumManualEffortBreakdown({ staticStart: true })
+            : null;
+        const releaseExcess = releaseBreakdown
+            ? Math.max(0, Math.abs(appliedTorque) + releaseBreakdown.passiveEffort - releaseBreakdown.frictionLimit)
+            : 0;
+
+        const friction = lowSpeedRelease
+            ? { effort: 0, locked: false }
+            : computeFrictionEffort(appliedTorque + gravityTorque + dampingTorque, sim.velocity, sim.mass * sim.gravity, leverArm);
+        let totalTorque = lowSpeedRelease
+            ? releaseBreakdown.sign * releaseExcess
+            : appliedTorque + gravityTorque + dampingTorque + friction.effort;
+        let angularAcc = totalTorque / Math.max(sim.inertia, 1e-6);
+
+        if (friction.locked) {
+            sim.velocity = 0;
+            angularAcc = 0;
+        }
+
+        sim.velocity += angularAcc * dt;
+        sim.position += sim.velocity * dt;
+
+        if (Number.isFinite(sim.lowerLimit)) {
+            const lowRad = sim.lowerLimit * Math.PI / 180;
+            if (sim.position < lowRad) {
+                sim.position = lowRad;
+                if (sim.velocity < 0) sim.velocity = 0;
+                if (appliedTorque < 0) {
+                    appliedTorque = 0;
+                    totalTorque = 0;
+                    angularAcc = 0;
+                    stopManualForce(true);
+                }
+            }
+        }
+        if (Number.isFinite(sim.upperLimit)) {
+            const highRad = sim.upperLimit * Math.PI / 180;
+            if (sim.position > highRad) {
+                sim.position = highRad;
+                if (sim.velocity > 0) sim.velocity = 0;
+                if (appliedTorque > 0) {
+                    appliedTorque = 0;
+                    totalTorque = 0;
+                    angularAcc = 0;
+                    stopManualForce(true);
+                }
+            }
+        }
+
+        sim.acceleration = angularAcc;
+        sim.driveEffort = appliedTorque;
+        sim.gravityEffort = gravityTorque;
+        sim.totalEffort = totalTorque;
+
+        return {
+            current: sim.position * 180 / Math.PI,
+            target: params.targetPosition,
+            velocity: sim.velocity * 180 / Math.PI,
+            driveEffort: appliedTorque,
+            gravityEffort: gravityTorque,
+            totalEffort: totalTorque,
+            acceleration: angularAcc * 180 / Math.PI
+        };
+    }
+
+    function simStepPrismatic(dt) {
+        let appliedForce = getManualEffort();
+        const terms = getPrismaticForceTerms();
+        const dampingForce = terms.dampingForce;
+        const gravityForce = terms.gravityParallel;
+
+        if (shouldHoldAtRestForManualDirection(appliedForce)) {
+            sim.velocity = 0;
+            sim.acceleration = 0;
+            sim.driveEffort = appliedForce;
+            sim.gravityEffort = gravityForce;
+            sim.totalEffort = 0;
+
+            return {
+                current: sim.position,
+                target: params.targetPosition,
+                velocity: 0,
+                driveEffort: appliedForce,
+                gravityEffort: gravityForce,
+                totalEffort: 0,
+                acceleration: 0
+            };
+        }
+
+        const friction = computeFrictionEffort(appliedForce + gravityForce + dampingForce, sim.velocity, terms.normalForce);
+        let totalForce = appliedForce + gravityForce + dampingForce + friction.effort;
+        let acceleration = totalForce / Math.max(sim.mass, 1e-6);
+
+        if (friction.locked) {
+            sim.velocity = 0;
+            acceleration = 0;
+        }
+
+        sim.velocity += acceleration * dt;
+        sim.position += sim.velocity * dt;
+
+        if (Number.isFinite(sim.lowerLimit) && sim.position < sim.lowerLimit) {
+            sim.position = sim.lowerLimit;
+            if (sim.velocity < 0) sim.velocity = 0;
+            if (appliedForce < 0) {
+                appliedForce = 0;
+                totalForce = 0;
+                acceleration = 0;
+                stopManualForce(true);
+            }
+        }
+        if (Number.isFinite(sim.upperLimit) && sim.position > sim.upperLimit) {
+            sim.position = sim.upperLimit;
+            if (sim.velocity > 0) sim.velocity = 0;
+            if (appliedForce > 0) {
+                appliedForce = 0;
+                totalForce = 0;
+                acceleration = 0;
+                stopManualForce(true);
+            }
+        }
+
+        sim.acceleration = acceleration;
+        sim.driveEffort = appliedForce;
+        sim.gravityEffort = gravityForce;
+        sim.totalEffort = totalForce;
+
+        return {
+            current: sim.position,
+            target: params.targetPosition,
+            velocity: sim.velocity,
+            driveEffort: appliedForce,
+            gravityEffort: gravityForce,
+            totalEffort: totalForce,
+            acceleration: acceleration
+        };
+    }
+
+    function simStep() {
+        const dt = 0.016;
+        const substeps = 4;
+        let latest = { current: 0, target: 0, velocity: 0, driveEffort: 0, gravityEffort: 0, totalEffort: 0, acceleration: 0 };
+
+        if (sim.paused) {
+            latest.current = sim.type === "PrismaticJoint" ? sim.position : sim.position * 180 / Math.PI;
+            latest.target = params.targetPosition;
+            latest.velocity = 0;
+            latest.driveEffort = 0;
+            latest.gravityEffort = sim.type === "PrismaticJoint" ? getPrismaticGravityForce() : getRevoluteForceTerms().gravityTorque;
+            latest.totalEffort = 0;
+            latest.acceleration = 0;
+            sim.velocity = 0;
+            sim.acceleration = 0;
+            pushHistory(latest);
+            updateLiveValues(latest);
+            return;
+        }
+
+        const h = dt / substeps;
+
+        for (let i = 0; i < substeps; i++) {
+            latest = sim.type === "PrismaticJoint" ? simStepPrismatic(h) : simStepRevolute(h);
+            if (sim.paused) break;
+        }
+
+        sim.time += dt;
+
+        if (!Number.isFinite(sim.velocity) || !Number.isFinite(sim.position)) {
+            resetSimStateForCurrent();
+        }
+
+        pushHistory(latest);
+        updateLiveValues(latest);
+    }
+
+    function v3(value, fallback = [0, 0, 0]) {
+        if (!value || value.length < 3) return fallback.slice();
+        return [num(value[0], fallback[0]), num(value[1], fallback[1]), num(value[2], fallback[2])];
+    }
+
+    function vAdd(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+    function vSub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+    function vMul(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+    function vDot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+    function vCross(a, b) {
+        return [
+            a[1] * b[2] - a[2] * b[1],
+            a[2] * b[0] - a[0] * b[2],
+            a[0] * b[1] - a[1] * b[0],
+        ];
+    }
+    function vLen(a) { return Math.sqrt(Math.max(vDot(a, a), 0)); }
+    function vNorm(a, fallback = [1, 0, 0]) {
+        const len = vLen(a);
+        if (len <= 1e-9) return fallback.slice();
+        return [a[0] / len, a[1] / len, a[2] / len];
+    }
+
+    function makeViewBasis(view) {
+        const target = v3(view?.target, [0, 0, 0]);
+        const cameraPosition = v3(view?.camera_position, [0, 0, 3]);
+        const cameraUp = vNorm(v3(view?.camera_up, [0, 1, 0]), [0, 1, 0]);
+        const forward = vNorm(vSub(target, cameraPosition), [0, 0, -1]);
+        let right = vNorm(vCross(forward, cameraUp), [1, 0, 0]);
+        let up = vNorm(vCross(right, forward), [0, 1, 0]);
+        return { target, cameraPosition, forward, right, up };
+    }
+
+    function makeSideViewBasis(view, target, approxLength, mode) {
+        const distance = Math.max(num(view?.camera_distance, 0), approxLength * 2.8, 1);
+
+        if (!mode || mode === "auto") {
+            if (currentJoint?.type === "RevoluteJoint") {
+                const viewDir = getEffectiveSignedDirectionVector(currentJoint, view?.axis_vector);
+                const cameraPosition = vAdd(target, vMul(viewDir, distance));
+                const cameraUp = Math.abs(vDot(viewDir, [0, 0, 1])) < 0.95 ? [0, 0, 1] : [0, 1, 0];
+                return makeViewBasis({
+                    target,
+                    camera_position: cameraPosition,
+                    camera_up: cameraUp,
+                });
+            }
+
+            return makeViewBasis(view);
+        }
+
+        const normalizedMode = normalizeMotionKeyForUi(mode);
+        const dir = motionOverrideVector(normalizedMode) || [0, 0, 1];
+        const cameraPosition = vAdd(target, vMul(dir, distance));
+        let cameraUp = [0, 0, 1];
+
+        if (Math.abs(vDot(vNorm(dir, [0, 0, 1]), cameraUp)) > 0.95) {
+            cameraUp = [0, 1, 0];
+        }
+
+        return makeViewBasis({
+            target,
+            camera_position: cameraPosition,
+            camera_up: cameraUp,
+        });
+    }
+
+    function describeSideViewMode(mode) {
+        const normalizedMode = normalizeMotionKeyForUi(mode);
+        if (normalizedMode === "+x") return "View from +X: Y-Z plane";
+        if (normalizedMode === "-x") return "View from -X: Y-Z plane";
+        if (normalizedMode === "+y") return "View from +Y: X-Z plane";
+        if (normalizedMode === "-y") return "View from -Y: X-Z plane";
+        if (normalizedMode === "+z") return "View from +Z: X-Y plane";
+        if (normalizedMode === "-z") return "View from -Z: X-Y plane";
+        if (currentJoint?.type === "RevoluteJoint") return "Auto: view along the current revolute joint axis";
+        return "Auto: suggested side view";
+    }
+
+    function dominantAxisInfo(vec) {
+        const v = vNorm(vec, [1, 0, 0]);
+        const candidates = [
+            { axis: "X", value: v[0] },
+            { axis: "Y", value: v[1] },
+            { axis: "Z", value: v[2] },
+        ];
+        candidates.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+        const main = candidates[0];
+        return {
+            axis: main.axis,
+            positiveLabel: main.value >= 0 ? `+${main.axis}` : `-${main.axis}`,
+            negativeLabel: main.value >= 0 ? `-${main.axis}` : `+${main.axis}`,
+        };
+    }
+
+    function drawSideViewAxisCross(ctx2, canvasEl, basis, cx, cy) {
+        const rightAxis = dominantAxisInfo(basis.right);
+        const upAxis = dominantAxisInfo(basis.up);
+        const pad = 18;
+
+        ctx2.strokeStyle = "#e5e5e5";
+        ctx2.lineWidth = 1;
+        ctx2.beginPath();
+        ctx2.moveTo(0, cy);
+        ctx2.lineTo(canvasEl.width, cy);
+        ctx2.moveTo(cx, 0);
+        ctx2.lineTo(cx, canvasEl.height);
+        ctx2.stroke();
+
+        ctx2.font = "600 13px sans-serif";
+        ctx2.fillStyle = "#777";
+        ctx2.textBaseline = "middle";
+
+        ctx2.textAlign = "left";
+        ctx2.fillText(rightAxis.negativeLabel, pad, cy - 14);
+
+        ctx2.textAlign = "right";
+        ctx2.fillText(rightAxis.positiveLabel, canvasEl.width - pad, cy - 14);
+
+        ctx2.textAlign = "center";
+        ctx2.fillText(upAxis.positiveLabel, cx + 24, pad);
+        ctx2.fillText(upAxis.negativeLabel, cx + 24, canvasEl.height - pad);
+    }
+
+    function drawSideViewLimitLabels(ctx2, canvasEl, labels) {
+        const visible = labels
+            .filter(item => item && Number.isFinite(item.x))
+            .sort((a, b) => a.x - b.x);
+
+        if (!visible.length) return;
+
+        const left = visible[0];
+        const right = visible.length > 1 ? visible[visible.length - 1] : null;
+
+        function drawPill(item, x, align) {
+            const text = `${item.name}: ${fmt(item.value)}`;
+            ctx2.save();
+            ctx2.font = "600 13px sans-serif";
+            const metrics = ctx2.measureText(text);
+            const w = Math.min(metrics.width + 18, canvasEl.width * 0.46);
+            const h = 26;
+            const y = 10;
+            const rx = align === "left" ? x : x - w;
+
+            ctx2.fillStyle = "rgba(255,255,255,0.92)";
+            ctx2.strokeStyle = item.color;
+            ctx2.lineWidth = 1.5;
+            ctx2.beginPath();
+            ctx2.roundRect(rx, y, w, h, 6);
+            ctx2.fill();
+            ctx2.stroke();
+
+            ctx2.fillStyle = "#222";
+            ctx2.textBaseline = "middle";
+            ctx2.textAlign = align;
+            ctx2.fillText(text, align === "left" ? rx + 9 : rx + w - 9, y + h / 2, w - 18);
+            ctx2.restore();
+        }
+
+        drawPill(left, 14, "left");
+        if (right && right.name !== left.name) {
+            drawPill(right, canvasEl.width - 14, "right");
+        }
+    }
+
+    function vectorDirectionLabel(vec) {
+        const v = vNorm(vec, [0, 0, 0]);
+        const axes = [
+            { name: "X", value: v[0] },
+            { name: "Y", value: v[1] },
+            { name: "Z", value: v[2] },
+        ];
+        axes.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+        const main = axes[0];
+        if (!main || Math.abs(main.value) <= 1e-6) return "-";
+        const sign = main.value >= 0 ? "+" : "-";
+        return `${sign}${main.name} direction`;
+    }
+
+    function normalizeMotionKeyForUi(key) {
+        const value = String(key || "auto").trim().toLowerCase();
+        switch (value) {
+            case "x":
+            case "+x": return "+x";
+            case "-x": return "-x";
+            case "y":
+            case "+y": return "+y";
+            case "-y": return "-y";
+            case "z":
+            case "+z": return "+z";
+            case "-z": return "-z";
+            default: return "auto";
+        }
+    }
+
+    function motionOverrideVector(key) {
+        switch ((key || "").toLowerCase()) {
+            case "+x": return [1, 0, 0];
+            case "-x": return [-1, 0, 0];
+            case "+y": return [0, 1, 0];
+            case "-y": return [0, -1, 0];
+            case "+z": return [0, 0, 1];
+            case "-z": return [0, 0, -1];
+            default: return null;
+        }
+    }
+
+    function getCurrentMotionOverrideKey() {
+        if (!currentJoint?.path) return "auto";
+        if (Object.prototype.hasOwnProperty.call(motionDirectionOverrides, currentJoint.path)) {
+            return normalizeMotionKeyForUi(motionDirectionOverrides[currentJoint.path] || "auto");
+        }
+        return normalizeMotionKeyForUi(currentJoint.motion_direction || currentJoint.preview_view?.motion_direction || "auto");
+    }
+
+    function getEffectiveMotionVector(joint, fallbackMotion) {
+        const overrideKey = getCurrentMotionOverrideKey();
+        const overrideVec = motionOverrideVector(overrideKey);
+        if (overrideVec) return overrideVec;
+        const defaultMotion = joint?.preview_view?.default_motion_vector || fallbackMotion;
+        return vNorm(v3(defaultMotion, [1, 0, 0]), [1, 0, 0]);
+    }
+
+    function getEffectiveAxisVector(joint, fallbackAxis) {
+        const overrideKey = getCurrentMotionOverrideKey();
+        const overrideVec = motionOverrideVector(overrideKey);
+        if (overrideVec && joint?.type === "RevoluteJoint") {
+            return vNorm(overrideVec.map(value => Math.abs(value)), [1, 0, 0]);
+        }
+        return vNorm(v3(fallbackAxis, [1, 0, 0]), [1, 0, 0]);
+    }
+
+    function getEffectiveSignedDirectionVector(joint, fallbackAxis) {
+        const overrideKey = getCurrentMotionOverrideKey();
+        const overrideVec = motionOverrideVector(overrideKey);
+        if (overrideVec && joint?.type === "RevoluteJoint") {
+            return vNorm(overrideVec, [1, 0, 0]);
+        }
+        return vNorm(v3(fallbackAxis, [1, 0, 0]), [1, 0, 0]);
+    }
+
+    function applyMotionDirectionToTargetPosition(directionKey) {
+        if (!currentJoint || directionKey === "auto") return;
+
+        const sign = String(directionKey).startsWith("-") ? -1 : 1;
+        params.targetPosition = sign * Math.abs(num(params.targetPosition, 0));
+        inputs.targetRange.value = params.targetPosition;
+        inputs.targetNum.value = params.targetPosition;
+        syncLabels();
+    }
+
+    function syncMotionOverrideControl() {
+        if (!ui.jointMotionOverride) return;
+        ui.jointMotionOverride.value = getCurrentMotionOverrideKey();
+    }
+
+    function handleMotionOverrideChange() {
+        if (!currentJoint?.path || !ui.jointMotionOverride) return;
+        const value = normalizeMotionKeyForUi(ui.jointMotionOverride.value || "auto");
+        motionDirectionOverrides[currentJoint.path] = value;
+        applyMotionDirectionToTargetPosition(value);
+        renderJointList();
+        drawJointSideView();
+        log(`Pending motion direction for joint: ${currentJoint.path} -> ${value}. Saving will update the USD axis, target position, and limits.`);
+    }
+
+    function refreshSideInfoControlRefs() {
+        inputs.manualForceNum = document.getElementById("manualForceNum");
+        inputs.manualForceDirection = document.getElementById("manualForceDirection");
+        const startManualForceBtn = document.getElementById("startManualForceBtn");
+        const stopManualForceBtn = document.getElementById("stopManualForceBtn");
+        const resetManualForceBtn = document.getElementById("resetManualForceBtn");
+        const calculateManualForceBtn = document.getElementById("calculateManualForceBtn");
+        ui.jointMotionOverride = document.getElementById("jointMotionOverride");
+
+        if (inputs.manualForceNum) {
+            inputs.manualForceNum.value = params.manualForce;
+            inputs.manualForceNum.addEventListener("change", () => {
+                params.manualForce = Math.max(0, num(inputs.manualForceNum.value, 0));
+                inputs.manualForceNum.value = params.manualForce;
+            });
+        }
+
+        if (inputs.manualForceDirection) {
+            inputs.manualForceDirection.value = params.manualForceDirection;
+            inputs.manualForceDirection.addEventListener("change", () => {
+                params.manualForceDirection = inputs.manualForceDirection.value;
+                settleSimAtCurrentPosition();
+                setInteractionHint("direction changed; calculate again", 2200);
+                drawJointSideView();
+            });
+        }
+
+        if (startManualForceBtn) {
+            startManualForceBtn.addEventListener("click", startManualForce);
+        }
+
+        if (stopManualForceBtn) {
+            stopManualForceBtn.addEventListener("click", () => stopManualForce(false));
+        }
+
+        if (resetManualForceBtn) {
+            resetManualForceBtn.addEventListener("click", resetObjectToOrigin);
+        }
+
+        if (calculateManualForceBtn) {
+            calculateManualForceBtn.addEventListener("click", calculateMinimumManualForce);
+        }
+
+        if (ui.jointMotionOverride) {
+            syncMotionOverrideControl();
+            ui.jointMotionOverride.addEventListener("change", handleMotionOverrideChange);
+        }
+    }
+
+    function renderJointSideInfo(motion) {
+        if (!ui.jointSideInfo) return;
+
+        if (!currentJoint) {
+            if (jointSideInfoRenderKey === "__empty__") return;
+            jointSideInfoRenderKey = "__empty__";
+            ui.jointSideInfo.textContent = "Not loaded";
+            return;
+        }
+
+        const lower = fmt(currentJoint.lower_limit);
+        const upper = fmt(currentJoint.upper_limit);
+        const motionLabel = vectorDirectionLabel(motion);
+        const motionSource = currentJoint.type === "PrismaticJoint"
+            ? `Selected: ${params.manualForceDirection === "negative" ? "toward lower limit" : "toward upper limit"}`
+            : (currentJoint.motion_direction
+                ? `Saved in USD: ${currentJoint.motion_direction}`
+                : (Object.prototype.hasOwnProperty.call(motionDirectionOverrides, currentJoint.path)
+                    ? `Pending save: ${motionDirectionOverrides[currentJoint.path]}`
+                    : "Inferred by the local service"));
+        const jointName = currentJoint.name || "-";
+        const jointPath = currentJoint.path || "-";
+        const renderKey = JSON.stringify({
+            jointPath,
+            lower,
+            upper,
+            motionLabel,
+            motionSource,
+            manualForce: params.manualForce,
+            manualForceDirection: params.manualForceDirection,
+            motionOverride: getCurrentMotionOverrideKey(),
+        });
+
+        if (renderKey === jointSideInfoRenderKey) {
+            return;
+        }
+        jointSideInfoRenderKey = renderKey;
+
+        ui.jointSideInfo.innerHTML = `
+            <div class="side-info-list">
+                <div class="side-info-row">
+                    <div class="side-info-label">Current joint</div>
+                    <div class="side-info-value">
+                        <div class="side-info-main">${escapeHtml(jointName)}</div>
+                        <div class="side-info-sub">${escapeHtml(jointPath)}</div>
+                    </div>
+                </div>
+                <div class="side-info-row">
+                    <div class="side-info-label">Motion direction</div>
+                    <div class="side-info-value">
+                        <div class="side-info-main">${escapeHtml(motionLabel)}</div>
+                        <div class="side-info-sub">${escapeHtml(motionSource)}</div>
+                    </div>
+                </div>
+                <div class="side-info-row">
+                    <div class="side-info-label">limit</div>
+                    <div class="side-info-value side-info-main">${escapeHtml(lower)} ~ ${escapeHtml(upper)}</div>
+                </div>
+                <div class="side-info-controls">
+                    <div class="side-info-control-row">
+                        <label for="manualForceNum">Constant applied force preview</label>
+                        <div class="side-info-control-fields force-controls">
+                            <input id="manualForceNum" type="number" step="1" value="${escapeHtml(params.manualForce)}" />
+                            <select id="manualForceDirection">
+                                <option value="positive"${params.manualForceDirection === "positive" ? " selected" : ""}>toward upper limit</option>
+                                <option value="negative"${params.manualForceDirection === "negative" ? " selected" : ""}>toward lower limit</option>
+                            </select>
+                            <div class="force-button-row">
+                                <button id="startManualForceBtn" type="button">start</button>
+                                <button id="stopManualForceBtn" type="button">stop</button>
+                                <button id="resetManualForceBtn" type="button">reset</button>
+                                <button id="calculateManualForceBtn" type="button">calculate</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="side-info-control-row">
+                        <label for="jointMotionOverride">Joint motion and rotation direction</label>
+                        <div class="side-info-control-fields">
+                            <select id="jointMotionOverride">
+                                <option value="auto">Auto / use the loaded direction</option>
+                                <option value="+x">+X</option>
+                                <option value="-x">-X</option>
+                                <option value="+y">+Y</option>
+                                <option value="-y">-Y</option>
+                                <option value="+z">+Z</option>
+                                <option value="-z">-Z</option>
+                            </select>
+                            <div class="small">Saving writes the axis and signed target position and limits to the USD file.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        refreshSideInfoControlRefs();
+    }
+
+    function projectToSide(point, basis, scale, cx, cy) {
+        const d = vSub(point, basis.target);
+        return {
+            x: cx + vDot(d, basis.right) * scale,
+            y: cy - vDot(d, basis.up) * scale,
+        };
+    }
+
+    function getProjectedBboxRect(center, size, basis, scale, cx, cy, offset = [0, 0, 0]) {
+        const sx = Math.max(Math.abs(size[0]), 1e-6) / 2;
+        const sy = Math.max(Math.abs(size[1]), 1e-6) / 2;
+        const sz = Math.max(Math.abs(size[2]), 1e-6) / 2;
+        const points = [];
+        for (const dx of [-sx, sx]) {
+            for (const dy of [-sy, sy]) {
+                for (const dz of [-sz, sz]) {
+                    points.push(projectToSide(vAdd(center, vAdd(offset, [dx, dy, dz])), basis, scale, cx, cy));
+                }
+            }
+        }
+        const xs = points.map(p => p.x);
+        const ys = points.map(p => p.y);
+        return {
+            minX: Math.min(...xs),
+            maxX: Math.max(...xs),
+            minY: Math.min(...ys),
+            maxY: Math.max(...ys),
+        };
+    }
+
+    function drawArrow2D(ctx2, from, to, label, color) {
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len <= 1e-6) return;
+        const ux = dx / len;
+        const uy = dy / len;
+        ctx2.strokeStyle = color;
+        ctx2.fillStyle = color;
+        ctx2.lineWidth = 2;
+        ctx2.beginPath();
+        ctx2.moveTo(from.x, from.y);
+        ctx2.lineTo(to.x, to.y);
+        ctx2.stroke();
+        ctx2.beginPath();
+        ctx2.moveTo(to.x, to.y);
+        ctx2.lineTo(to.x - ux * 10 - uy * 5, to.y - uy * 10 + ux * 5);
+        ctx2.lineTo(to.x - ux * 10 + uy * 5, to.y - uy * 10 - ux * 5);
+        ctx2.closePath();
+        ctx2.fill();
+        if (label) {
+            ctx2.font = "12px sans-serif";
+            ctx2.fillText(label, to.x + 6, to.y - 6);
+        }
+    }
+
+    function hasValidBbox(xform) {
+        const center = xform?.bbox_center;
+        const size = xform?.bbox_size;
+        if (!Array.isArray(center) || center.length < 3 || !Array.isArray(size) || size.length < 3) return false;
+        const c = [Number(center[0]), Number(center[1]), Number(center[2])];
+        const s = [Number(size[0]), Number(size[1]), Number(size[2])];
+        if (!c.every(Number.isFinite) || !s.every(Number.isFinite)) return false;
+        return Math.max(Math.abs(s[0]), Math.abs(s[1]), Math.abs(s[2])) > 1e-7;
+    }
+
+    function isDescendantPath(parentPath, childPath) {
+        if (!parentPath || !childPath || parentPath === childPath) return false;
+        if (parentPath === "/") return childPath !== "/";
+        return childPath.startsWith(parentPath + "/");
+    }
+
+    function getDrawableSceneXforms() {
+        const all = (sceneData?.xforms || []).filter(hasValidBbox);
+        if (!all.length) return currentXform && hasValidBbox(currentXform) ? [currentXform] : [];
+
+        let drawable = all.filter(xform => {
+            if (!xform?.path || xform.path === "/") return false;
+            return !all.some(other => other !== xform && isDescendantPath(xform.path, other.path));
+        });
+
+        if (!drawable.length) drawable = all.filter(xform => xform?.path && xform.path !== "/");
+        if (!drawable.length) drawable = all;
+
+        if (currentXform?.path && hasValidBbox(currentXform) && !drawable.some(x => x.path === currentXform.path)) {
+            drawable.push(currentXform);
+        }
+
+        return drawable;
+    }
+
+    function getBboxCorners(center, size) {
+        const c = v3(center, [0, 0, 0]);
+        const s = v3(size, [1, 1, 1]);
+        const hx = Math.max(Math.abs(s[0]), 1e-6) / 2;
+        const hy = Math.max(Math.abs(s[1]), 1e-6) / 2;
+        const hz = Math.max(Math.abs(s[2]), 1e-6) / 2;
+        const points = [];
+        for (const dx of [-hx, hx]) {
+            for (const dy of [-hy, hy]) {
+                for (const dz of [-hz, hz]) {
+                    points.push([c[0] + dx, c[1] + dy, c[2] + dz]);
+                }
+            }
+        }
+        return points;
+    }
+
+    function getSceneBounds(xforms) {
+        const points = [];
+        for (const xform of xforms) {
+            points.push(...getBboxCorners(xform.bbox_center, xform.bbox_size));
+        }
+        if (!points.length) {
+            const fallback = v3(currentXform?.bbox_center, [0, 0, 0]);
+            return { center: fallback, size: [1, 1, 1], points: [fallback] };
+        }
+        const min = [Infinity, Infinity, Infinity];
+        const max = [-Infinity, -Infinity, -Infinity];
+        for (const p of points) {
+            for (let i = 0; i < 3; i++) {
+                min[i] = Math.min(min[i], p[i]);
+                max[i] = Math.max(max[i], p[i]);
+            }
+        }
+        return {
+            center: [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2],
+            size: [Math.max(max[0] - min[0], 1e-6), Math.max(max[1] - min[1], 1e-6), Math.max(max[2] - min[2], 1e-6)],
+            points,
+        };
+    }
+
+    function projectRaw(point, basis) {
+        const d = vSub(point, basis.target);
+        return {
+            x: vDot(d, basis.right),
+            y: -vDot(d, basis.up),
+        };
+    }
+
+    function getProjectedRawBounds(points, basis) {
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+        for (const point of points) {
+            const p = projectRaw(point, basis);
+            minX = Math.min(minX, p.x);
+            maxX = Math.max(maxX, p.x);
+            minY = Math.min(minY, p.y);
+            maxY = Math.max(maxY, p.y);
+        }
+        if (!Number.isFinite(minX) || Math.abs(maxX - minX) < 1e-9) {
+            minX = -0.5;
+            maxX = 0.5;
+        }
+        if (!Number.isFinite(minY) || Math.abs(maxY - minY) < 1e-9) {
+            minY = -0.5;
+            maxY = 0.5;
+        }
+        return { minX, maxX, minY, maxY };
+    }
+
+    function getProjectedRectFromPoints(points, basis, scale, cx, cy) {
+        const projected = points.map(point => projectToSide(point, basis, scale, cx, cy));
+        const xs = projected.map(p => p.x);
+        const ys = projected.map(p => p.y);
+        return {
+            minX: Math.min(...xs),
+            maxX: Math.max(...xs),
+            minY: Math.min(...ys),
+            maxY: Math.max(...ys),
+        };
+    }
+
+    function drawProjectedBboxEdges(ctx2, points, basis, scale, cx, cy, strokeStyle, lineWidth = 2, dash = null) {
+        if (!points || points.length < 8) return false;
+
+        const projected = points.map(point => projectToSide(point, basis, scale, cx, cy));
+        const edges = [
+            [0, 1], [0, 2], [0, 4],
+            [1, 3], [1, 5],
+            [2, 3], [2, 6],
+            [3, 7],
+            [4, 5], [4, 6],
+            [5, 7],
+            [6, 7],
+        ];
+
+        ctx2.save();
+        if (dash) ctx2.setLineDash(dash);
+        ctx2.strokeStyle = strokeStyle;
+        ctx2.lineWidth = lineWidth;
+        ctx2.beginPath();
+
+        for (const [a, b] of edges) {
+            const p0 = projected[a];
+            const p1 = projected[b];
+            if (!p0 || !p1) continue;
+            ctx2.moveTo(p0.x, p0.y);
+            ctx2.lineTo(p1.x, p1.y);
+        }
+
+        ctx2.stroke();
+        ctx2.restore();
+        return true;
+    }
+
+    function rectArea(rect) {
+        return Math.max(rect.maxX - rect.minX, 0) * Math.max(rect.maxY - rect.minY, 0);
+    }
+
+    function isValidRect(rect) {
+        return rect
+            && Number.isFinite(rect.minX)
+            && Number.isFinite(rect.maxX)
+            && Number.isFinite(rect.minY)
+            && Number.isFinite(rect.maxY)
+            && rect.maxX > rect.minX
+            && rect.maxY > rect.minY;
+    }
+
+    function rectIntersectsCanvas(rect, canvasObj) {
+        return isValidRect(rect)
+            && rect.maxX >= 0
+            && rect.minX <= canvasObj.width
+            && rect.maxY >= 0
+            && rect.minY <= canvasObj.height;
+    }
+
+    function rectLooksDrawable(rect, canvasObj) {
+        if (!rectIntersectsCanvas(rect, canvasObj)) return false;
+        const area = rectArea(rect);
+        if (!Number.isFinite(area) || area <= 0.25) return false;
+        return area <= canvasObj.width * canvasObj.height * 20;
+    }
+
+    function drawRectBox(ctx2, rect, fillStyle, strokeStyle, lineWidth = 1, dash = null) {
+        if (!isValidRect(rect)) return false;
+        const w = rect.maxX - rect.minX;
+        const h = rect.maxY - rect.minY;
+        ctx2.save();
+        if (dash) ctx2.setLineDash(dash);
+        ctx2.fillStyle = fillStyle;
+        ctx2.strokeStyle = strokeStyle;
+        ctx2.lineWidth = lineWidth;
+        ctx2.fillRect(rect.minX, rect.minY, w, h);
+        ctx2.strokeRect(rect.minX, rect.minY, w, h);
+        ctx2.restore();
+        return true;
+    }
+
+    function rotatePointAroundAxis(point, pivot, axis, angleRad) {
+        const u = vNorm(axis, [1, 0, 0]);
+        const p = vSub(point, pivot);
+        const cosA = Math.cos(angleRad);
+        const sinA = Math.sin(angleRad);
+        const term1 = vMul(p, cosA);
+        const term2 = vMul(vCross(u, p), sinA);
+        const term3 = vMul(u, vDot(u, p) * (1 - cosA));
+        return vAdd(pivot, vAdd(vAdd(term1, term2), term3));
+    }
+
+    function transformControlledBboxCorners(baseCorners, jointCenter, axis, motion, currentOrTarget) {
+        if (currentJoint?.type === "PrismaticJoint") {
+            const jointValue = num(currentOrTarget, 0);
+            const offset = vMul(axis, jointValue);
+            return baseCorners.map(point => vAdd(point, offset));
+        }
+
+        const usdValue = num(currentJoint?.target_position, 0);
+        const deltaRad = (currentOrTarget - usdValue) * Math.PI / 180;
+        return baseCorners.map(point => rotatePointAroundAxis(point, jointCenter, axis, deltaRad));
+    }
+
+    function drawJointSideView() {
+        if (!jointSideCanvas || !jointSideCtx) return;
+
+        const c = jointSideCanvas;
+        const g = jointSideCtx;
+        g.clearRect(0, 0, c.width, c.height);
+        g.fillStyle = "#fbfbfb";
+        g.fillRect(0, 0, c.width, c.height);
+
+        if (!currentJoint || !currentXform || !currentJoint.preview_view) {
+            g.fillStyle = "#666";
+            g.font = "14px sans-serif";
+            g.fillText("Load a USD file to view the selected side of the full object.", 24, 40);
+            renderJointSideInfo([0, 0, 0]);
+            return;
+        }
+
+        const drawableXforms = getDrawableSceneXforms();
+        const sceneBounds = getSceneBounds(drawableXforms);
+        const sceneCenter = sceneBounds.center;
+        const sceneApproxLength = Math.max(sceneBounds.size[0], sceneBounds.size[1], sceneBounds.size[2], 1e-6);
+
+        const view = currentJoint.preview_view;
+        const jointCenter = v3(view.joint_center, v3(currentXform.bbox_center, sceneCenter));
+        const axis = getEffectiveAxisVector(currentJoint, view.axis_vector);
+        const motion = getEffectiveMotionVector(currentJoint, view.motion_vector);
+        const displayMotion = currentJoint.type === "PrismaticJoint" ? vMul(axis, getManualForceSign()) : motion;
+        const sideMode = ui.sideViewMode?.value || selectedSideViewMode || "auto";
+        selectedSideViewMode = sideMode;
+
+        const basis = makeSideViewBasis(view, sceneCenter, sceneApproxLength, sideMode);
+
+        const currentBaseCorners = getBboxCorners(currentXform.bbox_center, currentXform.bbox_size);
+        let currentValue = currentJoint.type === "PrismaticJoint" ? sim.position : sim.position * 180 / Math.PI;
+        if (!Number.isFinite(currentValue)) currentValue = num(currentJoint?.target_position, 0);
+        const targetValue = Number.isFinite(params.targetPosition) ? params.targetPosition : num(currentJoint?.target_position, 0);
+        const currentMovedCorners = transformControlledBboxCorners(currentBaseCorners, jointCenter, axis, motion, currentValue);
+        const targetMovedCorners = transformControlledBboxCorners(currentBaseCorners, jointCenter, axis, motion, targetValue);
+
+        const rawBounds = getProjectedRawBounds(sceneBounds.points, basis);
+        const targetOccupancyRatio = 0.40;
+        const rawW = Math.max(rawBounds.maxX - rawBounds.minX, 1e-6);
+        const rawH = Math.max(rawBounds.maxY - rawBounds.minY, 1e-6);
+        const scaleX = (c.width * targetOccupancyRatio) / rawW;
+        const scaleY = (c.height * targetOccupancyRatio) / rawH;
+        const scale = Math.max(Math.min(scaleX, scaleY), 1e-6);
+        const rawCenterX = (rawBounds.minX + rawBounds.maxX) / 2;
+        const rawCenterY = (rawBounds.minY + rawBounds.maxY) / 2;
+        const cx = c.width / 2 - rawCenterX * scale;
+        const cy = c.height / 2 - rawCenterY * scale;
+        const origin = projectToSide(sceneCenter, basis, scale, cx, cy);
+
+        drawSideViewAxisCross(g, c, basis, origin.x, origin.y);
+
+        const staticItems = drawableXforms
+            .filter(xform => xform.path !== currentXform.path)
+            .map(xform => {
+                const rect = getProjectedBboxRect(xform.bbox_center, xform.bbox_size, basis, scale, cx, cy);
+                return { xform, rect, area: rectArea(rect) };
+            })
+            .filter(item => item.area > 0.25)
+            .sort((a, b) => b.area - a.area);
+
+        for (const item of staticItems) {
+            drawRectBox(g, item.rect, "rgba(120, 120, 120, 0.10)", "rgba(120, 120, 120, 0.42)", 1);
+        }
+
+        const baseRect = getProjectedRectFromPoints(currentBaseCorners, basis, scale, cx, cy);
+        drawRectBox(g, baseRect, "rgba(255, 170, 0, 0.05)", "rgba(180, 120, 0, 0.18)", 1);
+        drawProjectedBboxEdges(g, currentBaseCorners, basis, scale, cx, cy, "rgba(180, 120, 0, 0.55)", 2);
+
+        const targetRect = getProjectedRectFromPoints(targetMovedCorners, basis, scale, cx, cy);
+        drawProjectedBboxEdges(g, targetMovedCorners, basis, scale, cx, cy, "rgba(220, 60, 60, 0.80)", 2, [8, 8]);
+
+        const sideLimitLabels = [];
+        const lowerValue = Number.isFinite(Number(sim.lowerLimit)) ? Number(sim.lowerLimit) : Number(currentJoint.lower_limit);
+        const upperValue = Number.isFinite(Number(sim.upperLimit)) ? Number(sim.upperLimit) : Number(currentJoint.upper_limit);
+
+        if (currentJoint.type === "RevoluteJoint") {
+            if (Number.isFinite(lowerValue)) {
+                const lowerCorners = transformControlledBboxCorners(currentBaseCorners, jointCenter, axis, motion, lowerValue);
+                drawProjectedBboxEdges(g, lowerCorners, basis, scale, cx, cy, "rgba(220, 60, 60, 0.64)", 2, [5, 5]);
+                const lowerRect = getProjectedRectFromPoints(lowerCorners, basis, scale, cx, cy);
+                sideLimitLabels.push({ name: "lower limit", value: lowerValue, x: (lowerRect.minX + lowerRect.maxX) / 2, color: "rgba(220, 60, 60, 0.82)" });
+            }
+            if (Number.isFinite(upperValue)) {
+                const upperCorners = transformControlledBboxCorners(currentBaseCorners, jointCenter, axis, motion, upperValue);
+                drawProjectedBboxEdges(g, upperCorners, basis, scale, cx, cy, "rgba(0, 120, 220, 0.64)", 2, [5, 5]);
+                const upperRect = getProjectedRectFromPoints(upperCorners, basis, scale, cx, cy);
+                sideLimitLabels.push({ name: "upper limit", value: upperValue, x: (upperRect.minX + upperRect.maxX) / 2, color: "rgba(0, 120, 220, 0.82)" });
+            }
+        }
+
+        const currentRect = getProjectedRectFromPoints(currentMovedCorners, basis, scale, cx, cy);
+        if (rectLooksDrawable(currentRect, c)) {
+            drawProjectedBboxEdges(g, currentMovedCorners, basis, scale, cx, cy, "#111", 4);
+        } else if (rectLooksDrawable(targetRect, c)) {
+            drawProjectedBboxEdges(g, targetMovedCorners, basis, scale, cx, cy, "#111", 4);
+        } else {
+            drawProjectedBboxEdges(g, currentBaseCorners, basis, scale, cx, cy, "#111", 4);
+        }
+
+        const joint2d = projectToSide(jointCenter, basis, scale, cx, cy);
+        const currentCenterForArrow = currentJoint.type === "PrismaticJoint"
+            ? vAdd(v3(currentXform.bbox_center, sceneCenter), vMul(axis, currentValue))
+            : v3(currentXform.bbox_center, sceneCenter);
+        const target2d = projectToSide(currentCenterForArrow, basis, scale, cx, cy);
+        const motionEnd = projectToSide(vAdd(jointCenter, vMul(displayMotion, sceneApproxLength * 0.16)), basis, scale, cx, cy);
+
+        g.strokeStyle = "rgba(0,0,0,0.20)";
+        g.lineWidth = 1;
+        g.beginPath();
+        g.moveTo(joint2d.x, joint2d.y);
+        g.lineTo(target2d.x, target2d.y);
+        g.stroke();
+
+        g.fillStyle = "#111";
+        g.beginPath();
+        g.arc(joint2d.x, joint2d.y, 5, 0, Math.PI * 2);
+        g.fill();
+        g.fillStyle = "#fff";
+        g.beginPath();
+        g.arc(joint2d.x, joint2d.y, 2, 0, Math.PI * 2);
+        g.fill();
+
+        drawArrow2D(g, joint2d, motionEnd, "motion", "rgba(0, 140, 80, 0.9)");
+
+        if (currentJoint.type === "PrismaticJoint") {
+            const controlledCenter = v3(currentXform.bbox_center, sceneCenter);
+
+            if (Number.isFinite(lowerValue)) {
+                const p = projectToSide(vAdd(controlledCenter, vMul(axis, lowerValue)), basis, scale, cx, cy);
+                sideLimitLabels.push({ name: "lower limit", value: lowerValue, x: p.x, color: "rgba(220, 60, 60, 0.82)" });
+            }
+            if (Number.isFinite(upperValue)) {
+                const p = projectToSide(vAdd(controlledCenter, vMul(axis, upperValue)), basis, scale, cx, cy);
+                sideLimitLabels.push({ name: "upper limit", value: upperValue, x: p.x, color: "rgba(0, 120, 220, 0.82)" });
+            }
+        }
+
+        drawSideViewLimitLabels(g, c, sideLimitLabels);
+        renderJointSideInfo(displayMotion);
+    }
+
+    function drawRevolute() {
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const drawLength = 150;
+
+        ctx.strokeStyle = "#eee";
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(canvas.width, cy);
+        ctx.moveTo(cx, 0);
+        ctx.lineTo(cx, canvas.height);
+        ctx.stroke();
+
+        const targetRad = params.targetPosition * Math.PI / 180;
+        const tx = cx + Math.cos(targetRad) * drawLength;
+        const ty = cy - Math.sin(targetRad) * drawLength;
+
+        ctx.strokeStyle = "rgba(255, 100, 100, 0.55)";
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 10]);
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const ax = cx + Math.cos(sim.position) * drawLength;
+        const ay = cy - Math.sin(sim.position) * drawLength;
+
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 12;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(ax, ay);
+        ctx.stroke();
+
+        ctx.fillStyle = "#666";
+        ctx.beginPath();
+        ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#eee";
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+    }
+
+    function drawPrismatic() {
+        const left = 110;
+        const right = canvas.width - 110;
+        const y = canvas.height / 2;
+
+        const lower = Number.isFinite(sim.lowerLimit) ? sim.lowerLimit : Math.min(-2, params.targetPosition * 1.2);
+        const upper = Number.isFinite(sim.upperLimit) ? sim.upperLimit : Math.max(2, params.targetPosition * 1.2);
+        const minV = Math.min(lower, upper);
+        const maxV = Math.max(lower, upper);
+        const span = Math.max(maxV - minV, 1e-6);
+
+        function mapX(v) {
+            return left + ((v - minV) / span) * (right - left);
+        }
+
+        ctx.strokeStyle = "#e4e4e4";
+        ctx.lineWidth = 14;
+        ctx.beginPath();
+        ctx.moveTo(left, y);
+        ctx.lineTo(right, y);
+        ctx.stroke();
+
+        ctx.fillStyle = "#555";
+        ctx.fillRect(left - 6, y - 28, 12, 56);
+        ctx.fillRect(right - 6, y - 28, 12, 56);
+
+        const targetX = mapX(params.targetPosition);
+        ctx.strokeStyle = "rgba(255, 100, 100, 0.8)";
+        ctx.lineWidth = 3;
+        ctx.setLineDash([8, 8]);
+        ctx.beginPath();
+        ctx.moveTo(targetX, y - 80);
+        ctx.lineTo(targetX, y + 80);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const blockX = clamp(mapX(sim.position), left, right);
+        ctx.fillStyle = "#333";
+        ctx.fillRect(blockX - 40, y - 30, 80, 60);
+
+    }
+
+    function drawSim() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (sim.type === "PrismaticJoint") drawPrismatic();
+        else drawRevolute();
+    }
+
+    function drawLine(ctx2, history, minVal, maxVal, canvasW, canvasH, dash = false) {
+        function mapY(v) {
+            return canvasH - ((v - minVal) / (maxVal - minVal)) * canvasH;
+        }
+        ctx2.beginPath();
+        if (dash) ctx2.setLineDash([8, 8]);
+        else ctx2.setLineDash([]);
+        for (let i = 0; i < history.length; i++) {
+            const x = i / historyLength * canvasW;
+            const y = mapY(history[i]);
+            if (i === 0) ctx2.moveTo(x, y);
+            else ctx2.lineTo(x, y);
+        }
+        ctx2.stroke();
+        ctx2.setLineDash([]);
+    }
+
+    function drawChartCommon(ctx2, canvasEl, histories, labels) {
+        ctx2.clearRect(0, 0, canvasEl.width, canvasEl.height);
+        const all = histories.flat().filter(v => Number.isFinite(v));
+        let minVal = all.length ? Math.min(...all) : -1;
+        let maxVal = all.length ? Math.max(...all) : 1;
+
+        if (Math.abs(maxVal - minVal) < 1e-6) {
+            minVal -= 1;
+            maxVal += 1;
+        }
+
+        const padding = (maxVal - minVal) * 0.1;
+        minVal -= padding;
+        maxVal += padding;
+
+        function mapY(v) {
+            return canvasEl.height - ((v - minVal) / (maxVal - minVal)) * canvasEl.height;
+        }
+
+        ctx2.strokeStyle = "#ddd";
+        ctx2.lineWidth = 1;
+        ctx2.beginPath();
+        ctx2.moveTo(0, mapY(0));
+        ctx2.lineTo(canvasEl.width, mapY(0));
+        ctx2.stroke();
+
+        const styles = [
+            { stroke: "#333", dash: false },
+            { stroke: "rgba(255, 100, 100, 0.85)", dash: true },
+            { stroke: "rgba(0, 100, 220, 0.85)", dash: false },
+        ];
+
+        for (let i = 0; i < histories.length; i++) {
+            ctx2.strokeStyle = styles[i % styles.length].stroke;
+            ctx2.lineWidth = 2;
+            drawLine(ctx2, histories[i], minVal, maxVal, canvasEl.width, canvasEl.height, styles[i % styles.length].dash);
+        }
+
+        ctx2.fillStyle = "#333";
+        ctx2.font = "12px sans-serif";
+        for (let i = 0; i < labels.length; i++) {
+            ctx2.fillText(labels[i], 10, 20 + i * 18);
+        }
+    }
+
+    function drawCharts() {
+        drawChartCommon(
+            chartCtx,
+            chartCanvas,
+            [positionHistory, targetHistory, velocityHistory],
+            [
+                sim.type === "PrismaticJoint" ? "position" : "angle",
+                "target",
+                "velocity"
+            ]
+        );
+
+        drawChartCommon(
+            effortCtx,
+            effortCanvas,
+            [driveEffortHistory, totalEffortHistory, accelerationHistory],
+            [
+                sim.type === "PrismaticJoint" ? "appliedForce" : "appliedTorque",
+                sim.type === "PrismaticJoint" ? "totalForce" : "totalTorque",
+                "acceleration"
+            ]
+        );
+    }
+
+    let dragging = false;
+
+    function normalizeAngleToLimit(rawAngle, lower, upper, currentAngle) {
+        if (!Number.isFinite(lower) || !Number.isFinite(upper) || lower >= upper) {
+            return { value: rawAngle, clamped: false };
+        }
+
+        const candidates = [];
+        for (let k = -2; k <= 2; k++) {
+            candidates.push(rawAngle + k * 360);
+        }
+
+        const inside = candidates
+            .filter(value => value >= lower && value <= upper)
+            .sort((a, b) => Math.abs(a - currentAngle) - Math.abs(b - currentAngle));
+
+        if (inside.length > 0) {
+            return { value: inside[0], clamped: false };
+        }
+
+        const nearest = candidates
+            .map(value => ({
+                value,
+                endpoint: Math.abs(value - lower) <= Math.abs(value - upper) ? lower : upper,
+            }))
+            .sort((a, b) => Math.abs(a.value - a.endpoint) - Math.abs(b.value - b.endpoint))[0];
+
+        return { value: nearest.endpoint, clamped: true };
+    }
+
+    function startManualForce() {
+        readControlsFromNumber();
+        if (inputs.manualForceNum) {
+            params.manualForce = Math.max(0, num(inputs.manualForceNum.value, params.manualForce));
+        }
+        if (inputs.manualForceDirection) {
+            params.manualForceDirection = inputs.manualForceDirection.value;
+        }
+        if (!ensureManualDirectionCanMoveFromLimit()) return;
+        sim.paused = false;
+        sim.manualForceActive = true;
+        syncLabels();
+    }
+
+    function settleSimAtCurrentPosition() {
+        sim.manualForceActive = false;
+        sim.paused = true;
+        sim.velocity = 0;
+        sim.acceleration = 0;
+        sim.driveEffort = 0;
+        sim.totalEffort = 0;
+    }
+
+    function stopManualForce(autoLimitStop = false) {
+        sim.manualForceActive = false;
+        sim.paused = true;
+        sim.velocity = 0;
+        sim.acceleration = 0;
+        if (autoLimitStop) {
+            setInteractionHint("Joint limit reached. Applied force stopped and the current position is held.");
+        }
+        syncLabels();
+    }
+
+    function getPositionAtOriginWithinLimit() {
+        const origin = clampCoordinateToLimits(0);
+        return sim.type === "RevoluteJoint" ? origin * Math.PI / 180 : origin;
+    }
+
+    function resetObjectToOrigin() {
+        sim.manualForceActive = false;
+        sim.paused = true;
+        sim.position = getPositionAtOriginWithinLimit();
+        syncManualForceDirectionAwayFromCurrentLimit();
+        sim.velocity = 0;
+        sim.acceleration = 0;
+        sim.driveEffort = 0;
+        sim.totalEffort = 0;
+
+        positionHistory.length = 0;
+        targetHistory.length = 0;
+        velocityHistory.length = 0;
+        driveEffortHistory.length = 0;
+        totalEffortHistory.length = 0;
+        accelerationHistory.length = 0;
+
+        setInteractionHint("reset to origin", 1800);
+        syncLabels();
+    }
+
+    function isManualDirectionBlockedByLimit() {
+        return getManualLimitState() === "blocked_by_limit";
+    }
+
+    function ensureManualDirectionCanMoveFromLimit() {
+        if (!isManualDirectionBlockedByLimit()) return true;
+
+        const before = params.manualForceDirection;
+        syncManualForceDirectionAwayFromCurrentLimit();
+
+        if (before !== params.manualForceDirection && !isManualDirectionBlockedByLimit()) {
+            setInteractionHint(`direction switched to ${params.manualForceDirection === "negative" ? "lower" : "upper"} limit`, 2600);
+            log(`current position is already at a joint limit; direction switched from ${before} to ${params.manualForceDirection}.`);
+            return true;
+        }
+
+        setInteractionHint("blocked by limit", 2600);
+        log("current direction is blocked by joint limit. Switch direction or reset first.");
+        return false;
+    }
+
+    function calculateMinimumManualForce() {
+        readControlsFromNumber();
+        if (inputs.manualForceDirection) {
+            params.manualForceDirection = inputs.manualForceDirection.value;
+        }
+
+        settleSimAtCurrentPosition();
+
+        if (!ensureManualDirectionCanMoveFromLimit()) return;
+
+        const breakdown = getMinimumManualEffortBreakdown({ staticStart: true });
+        params.manualForce = Number(breakdown.minimumForce.toFixed(3));
+
+        if (inputs.manualForceNum) {
+            inputs.manualForceNum.value = params.manualForce;
+        }
+
+        setInteractionHint(`minimum force: ${fmt(params.manualForce)}`, 2600);
+        log(
+            "calculate minimum force\n" +
+            `direction = ${params.manualForceDirection}\n` +
+            `limit_state = ${breakdown.limitState}\n` +
+            `selected_motion = ${fmtVec(breakdown.selectedMotion)}\n` +
+            `velocity_for_calculate = ${fmtMotion(sim.type === "RevoluteJoint" ? breakdown.velocityForCalculate * 180 / Math.PI : breakdown.velocityForCalculate)} (${sim.type === "RevoluteJoint" ? "deg/s" : "unit/s"})\n` +
+            `damping = ${fmt(sim.damping)}\n` +
+            `gravity_motion_dot = ${fmt(breakdown.gravityMotionDot)}\n` +
+            `gravity_angle_deg = ${fmt(breakdown.gravityAngleDegrees)}\n` +
+            `gravity_relation = ${breakdown.gravityRelation || "-"}\n` +
+            `gravity_parallel = ${fmt(breakdown.gravityParallel)}\n` +
+            `normal_force = ${fmt(breakdown.normalForce)}\n` +
+            `damping_force = ${fmt(breakdown.dampingEffort)}\n` +
+            `static_limit = ${fmt(breakdown.staticLimit)}\n` +
+            `dynamic_limit = ${fmt(breakdown.dynamicLimit)}\n` +
+            `friction_limit = ${fmt(breakdown.frictionLimit)}\n` +
+            `passive_effort = ${fmt(breakdown.passiveEffort)}\n` +
+            `breakaway_threshold = ${fmt(breakdown.breakawayThreshold)}\n` +
+            `sliding_threshold = ${fmt(breakdown.slidingThreshold)}\n` +
+            `minimum_force = ${fmt(params.manualForce)}`
+        );
+    }
+
+    function loop() {
+        simStep();
+        drawSim();
+        drawJointSideView();
+        drawCharts();
+        requestAnimationFrame(loop);
+    }
+
+    setControls(1, 0, 0, 5, 0.5, 100000);
+    loop();
+
+    if (IS_HOSTED_PREVIEW) {
+        document.body.classList.add("is-hosted-preview");
+        document.getElementById("hostedModeNotice").hidden = false;
+        document.querySelectorAll(".container button, .container input, .container select").forEach(control => {
+            control.disabled = true;
+            control.title = "Available in the downloadable local workbench";
+        });
+        document.getElementById("statusLog").textContent = "Online preview only. Download the local workbench to load, edit, and save USD files.";
+    } else {
+        document.getElementById("localModeNotice").hidden = false;
+    }
+
+    console.log("USD mass + effort preview editor loaded");
+</script>
+</body>
+</html>

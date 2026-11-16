@@ -80,7 +80,7 @@ function renderGeometryTab(id) {
 
 function loadPhysicsData() {
   if (!physicsDataPromise) {
-    physicsDataPromise = fetch("assets/physics.json?v=20261115-material-rebalance1").then((response) => {
+    physicsDataPromise = fetch("assets/physics.json?v=20261116-microwave-door1").then((response) => {
       if (!response.ok) throw new Error("Physical properties could not be loaded");
       return response.json();
     });
