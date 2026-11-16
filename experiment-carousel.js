@@ -9,7 +9,7 @@
     const slides = Array.from(viewport.querySelectorAll(".experiment-slide"));
     if (!slides.length) return;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let activeIndex = 0;
+    let activeIndex = -1;
     let requestedIndex = null;
     let scrollFrame = 0;
     let settleTimer = 0;
@@ -25,7 +25,14 @@
     function showActive(index) {
       if (index !== activeIndex) {
         slides.forEach((slide, slideIndex) => {
-          if (slideIndex !== index) slide.querySelectorAll("video").forEach((video) => video.pause());
+          slide.querySelectorAll("video").forEach((video) => {
+            if (slideIndex === index) {
+              const playback = video.play();
+              if (playback) playback.catch(() => {});
+            } else {
+              video.pause();
+            }
+          });
         });
       }
       activeIndex = index;
