@@ -10,6 +10,13 @@ const instances = {
   ricebucket1: { title: "Rice Bucket" },
 };
 
+const motionRevisions = {
+  letter_tray1: "20261115-sequential1",
+  cabinet17: "20261115-sequential1",
+  dressing_case2: "20261115-sequential1",
+  laptop1: "20261115-dark-laptop1",
+};
+
 const dialog = document.querySelector("#instance-dialog");
 const dialogContent = document.querySelector("#dialog-content");
 const dialogTitle = document.querySelector("#dialog-title");
@@ -56,7 +63,7 @@ function renderGeometryTab(id) {
   const layout = document.createElement("div");
   layout.className = "dialog-usd-motion";
   const video = document.createElement("video");
-  const revision = id === "laptop1" ? "20261115-dark-laptop1" : "20261110-textures3";
+  const revision = motionRevisions[id] || "20261110-textures3";
   video.src = `assets/motion/${id}.mp4?v=${revision}`;
   video.poster = `${asset(id, "poster")}?v=20261110-front2`;
   video.autoplay = true;
