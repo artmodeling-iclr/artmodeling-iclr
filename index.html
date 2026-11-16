@@ -7,9 +7,10 @@
   <meta name="description" content="ArtModeling: an instance-matched collection of articulated objects, real observations, interaction sequences and USD assets.">
   <title>ArtModeling — Articulated Objects in the Real World</title>
   <link rel="preload" href="assets/objects/letter_tray1/gallery.webp?v=20261115-rgb1" as="image">
-  <link rel="stylesheet" href="styles.css?v=20261116-fidelity5">
+  <link rel="stylesheet" href="styles.css?v=20261116-fidelity6">
   <script src="app.js?v=20261116-physics2" defer></script>
   <script src="comparison-carousel.js?v=20261115-video1" defer></script>
+  <script src="experiment-carousel.js?v=20261116-lettertray1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -120,26 +121,49 @@
           <p><a class="section-number-link" href="#physical-fidelity-evaluation" aria-label="Direct link to Physical Fidelity Evaluation"><strong>Section 4:</strong></a> We use an optical–inertial motion capture system to record the joint trajectories of real-world objects. We compare these recordings with the joint motion of their corresponding articulated digital twins to evaluate differences between simulated and real-world joint behavior.</p>
         </div>
       </div>
-      <div class="experiment-grid">
-        <figure class="experiment-frame">
-          <img src="assets/experiments/cap-motion.jpg" alt="Optical-inertial motion capture system, weights, pulley assembly, and retroreflective markers">
-          <figcaption>Motion Capture Setup and Equipment</figcaption>
-        </figure>
-        <figure class="experiment-frame">
-          <video controls playsinline loop preload="metadata" poster="assets/experiments/cabinet17-poster.webp" aria-label="Real-world and simulated cabinet drawer motion">
-            <source src="assets/experiments/cabinet17.mp4" type="video/mp4">
-            Your browser does not support this video.
-          </video>
-          <figcaption>Real-World and Simulated Cabinet Motion</figcaption>
-        </figure>
-        <figure class="experiment-frame">
-          <video controls muted playsinline loop preload="metadata" poster="assets/experiments/cabinet17-curve-poster.webp" aria-label="Cabinet joint trajectory: optical motion capture compared with simulation">
-            <source src="assets/experiments/cabinet17-curve.mp4" type="video/mp4">
-            Your browser does not support this video.
-          </video>
-          <figcaption>Joint Trajectory Comparison</figcaption>
-        </figure>
+      <div class="experiment-carousel" aria-label="Physical fidelity evaluations" aria-roledescription="carousel">
+        <button class="comparison-arrow comparison-arrow-prev" id="experiment-prev" type="button" aria-label="Previous evaluation" aria-controls="experiment-viewport">&#8249;</button>
+        <div class="experiment-viewport" id="experiment-viewport" tabindex="0" aria-label="Physical fidelity evaluations; use left and right arrow keys to browse">
+          <div class="experiment-slide experiment-grid" data-label="Cabinet" aria-label="Cabinet evaluation, 1 of 2">
+            <figure class="experiment-frame">
+              <img src="assets/experiments/cap-motion.jpg" alt="Optical-inertial motion capture system, weights, pulley assembly, and retroreflective markers">
+              <figcaption>Motion Capture Setup and Equipment</figcaption>
+            </figure>
+            <figure class="experiment-frame">
+              <video controls playsinline loop preload="metadata" poster="assets/experiments/cabinet17-poster.webp" aria-label="Real-world and simulated cabinet drawer motion">
+                <source src="assets/experiments/cabinet17.mp4" type="video/mp4">
+                Your browser does not support this video.
+              </video>
+              <figcaption>Real-World and Simulated Cabinet Motion</figcaption>
+            </figure>
+            <figure class="experiment-frame">
+              <video controls muted playsinline loop preload="metadata" poster="assets/experiments/cabinet17-curve-poster.webp" aria-label="Cabinet joint trajectory: optical motion capture compared with simulation">
+                <source src="assets/experiments/cabinet17-curve.mp4" type="video/mp4">
+                Your browser does not support this video.
+              </video>
+              <figcaption>Joint Trajectory Comparison</figcaption>
+            </figure>
+          </div>
+          <div class="experiment-slide experiment-grid experiment-grid-pair" data-label="Letter Tray 2" aria-label="Letter Tray 2 evaluation, 2 of 2">
+            <figure class="experiment-frame">
+              <video controls playsinline loop preload="metadata" poster="assets/experiments/letter-tray2-poster.webp" aria-label="Real-world and simulated Letter Tray 2 motion">
+                <source src="assets/experiments/letter-tray2.mp4" type="video/mp4">
+                Your browser does not support this video.
+              </video>
+              <figcaption>Real-World and Simulated Letter Tray 2 Motion</figcaption>
+            </figure>
+            <figure class="experiment-frame">
+              <video controls muted playsinline loop preload="metadata" poster="assets/experiments/letter-tray2-curve-poster.webp" aria-label="Letter Tray 2 joint trajectory: optical motion capture compared with simulation">
+                <source src="assets/experiments/letter-tray2-curve.mp4" type="video/mp4">
+                Your browser does not support this video.
+              </video>
+              <figcaption>Joint Trajectory Comparison</figcaption>
+            </figure>
+          </div>
+        </div>
+        <button class="comparison-arrow comparison-arrow-next" id="experiment-next" type="button" aria-label="Next evaluation" aria-controls="experiment-viewport">&#8250;</button>
       </div>
+      <div class="comparison-dots" id="experiment-dots" aria-label="Choose a physical fidelity evaluation"></div>
     </section>
 
     <section class="section comparison-section shell" id="asset-comparison" aria-labelledby="comparison-title">
