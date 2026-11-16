@@ -365,6 +365,7 @@ body { background: #fff; color: #171717; font-family: Arial, Helvetica, sans-ser
 
 /* Experiment and asset comparison sections follow the existing square media cards. */
 .experiment-section.shell { width: min(1740px, calc(100% - 48px)); }
+.experiment-section .section-caption > p { max-width: 1120px; }
 .experiment-frame, .comparison-viewport { overflow: hidden; border: 1px solid #d9d9d9; background: #fff; }
 .experiment-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
 .experiment-frame { display: flex; flex-direction: column; min-width: 0; margin: 0; }
