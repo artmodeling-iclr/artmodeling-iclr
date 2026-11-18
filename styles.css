@@ -370,9 +370,9 @@ body { background: #fff; color: #171717; font-family: Arial, Helvetica, sans-ser
 .experiment-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
 .experiment-grid-pair { grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); }
 .experiment-carousel { position: relative; }
-.experiment-viewport { display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; transition: height .25s ease; }
+.experiment-viewport { display: flex; flex-flow: row nowrap; align-items: flex-start; width: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; transition: height .25s ease; }
 .experiment-viewport::-webkit-scrollbar { display: none; }
-.experiment-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+.experiment-slide { display: grid; flex: 0 0 100%; width: 100%; min-width: 100%; box-sizing: border-box; scroll-snap-align: start; }
 .experiment-frame { display: flex; flex-direction: column; min-width: 0; margin: 0; }
 .experiment-frame img, .experiment-frame video { display: block; width: 100%; height: clamp(250px, 21vw, 330px); object-fit: contain; background: #f5f5f5; }
 .experiment-frame figcaption { flex: 1; padding: 16px 18px; border-top: 1px solid #d9d9d9; color: #171717; font-size: 14px; font-weight: 700; }
