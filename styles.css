@@ -389,6 +389,28 @@ body { background: #fff; color: #171717; font-family: Arial, Helvetica, sans-ser
 .comparison-arrow:hover { border-color: #111; background: #111; color: #fff; }
 .comparison-arrow-prev { left: 12px; }
 .comparison-arrow-next { right: 12px; }
+#experiment-next {
+  display: grid !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 12px !important;
+  left: auto !important;
+  z-index: 20 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+#experiment-prev {
+  display: grid !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 12px !important;
+  right: auto !important;
+  z-index: 20 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
 .comparison-dots { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 12px; margin-top: 18px; }
 .comparison-dots button { width: 10px; height: 10px; padding: 0; border: 1px solid #111; border-radius: 50%; background: #fff; }
 .comparison-dots button[aria-current="true"] { background: #111; }
